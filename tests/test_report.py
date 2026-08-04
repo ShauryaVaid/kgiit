@@ -1,0 +1,73 @@
+import os
+import tempfile
+import unittest
+from pathlib import Path
+
+from triagectl.report import write_report
+
+
+class TestReport(unittest.TestCase):
+
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.output_path = os.path.join(self.temp_dir.name, "test-report.md")
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def test_write_report_with_issues(self):
+        issues = [
+            {
+                "number": 42,
+                "title": "Fix login crash",
+                "body": "Application crashes when clicking login button.",
+                "labels": ["bug", "critical"],
+                "url": "https://github.com/octocat/Hello-World/issues/42",
+                "created_at": "2026-08-04T10:00:00Z",
+                "comments": 5,
+            },
+            {
+                "number": 43,
+                "title": "Documentation update",
+                "body": None,
+                "labels": [],
+                "url": "https://github.com/octocat/Hello-World/issues/43",
+                "created_at": "2026-08-04T11:00:00Z",
+                "comments": 0,
+            },
+        ]
+
+        result_path = write_report("octocat", "Hello-World", issues, output_path=self.output_path)
+
+        self.assertEqual(result_path, self.output_path)
+        self.assertTrue(os.path.exists(self.output_path))
+
+        content = Path(self.output_path).read_text(encoding="utf-8")
+        
+        # Verify title & metadata
+        self.assertIn("# Triage Report: octocat/Hello-World", content)
+        self.assertIn("*Generated at:", content)
+        self.assertIn("*Total Open Issues: 2*", content)
+
+        # Verify summary table
+        self.assertIn("| # | Title | Labels | Comments |", content)
+        self.assertIn("| #42 | Fix login crash | `bug`, `critical` | 5 |", content)
+
+        # Verify issue details
+        self.assertIn("### Issue #42: Fix login crash", content)
+        self.assertIn("Application crashes when clicking login button.", content)
+        self.assertIn("### Issue #43: Documentation update", content)
+        self.assertIn("*No description provided.*", content)
+
+    def test_write_report_empty_issues(self):
+        result_path = write_report("owner", "empty-repo", [], output_path=self.output_path)
+
+        self.assertTrue(os.path.exists(result_path))
+        content = Path(result_path).read_text(encoding="utf-8")
+
+        self.assertIn("# Triage Report: owner/empty-repo", content)
+        self.assertIn("*No open issues found*", content)
+
+
+if __name__ == "__main__":
+    unittest.main()
