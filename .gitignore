@@ -19,7 +19,7 @@ ENV/
 # Triage outputs & reports (ignore markdown files except README)
 *.md
 !README.md
-*.log
+!.agents/**/*.md
 
 # IDE & OS files
 .vscode/
