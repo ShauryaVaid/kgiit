@@ -13,6 +13,14 @@ from triagectl import (
     print_issues_table,
     print_error,
     write_report,
+    classify_issue,
+    detect_duplicates,
+    rank_priorities,
+    build_triage_summary,
+)
+from triagectl.formatting import (
+    print_priority_table,
+    print_summary_panel,
 )
 
 try:
@@ -54,15 +62,22 @@ except ImportError:
     default=False,
     help="Skip generating and writing the report file.",
 )
+@click.option(
+    "--agent-skills/--no-agent-skills",
+    default=True,
+    show_default=True,
+    help="Enable Agent Skill Layer (classification, priority ranking, duplicate detection, summary).",
+)
 def main(
     repo: str,
     issue: Optional[int],
     all_open: bool,
     output: str,
     no_report: bool,
+    agent_skills: bool,
 ):
     """Main CLI entrypoint for triagectl."""
-    # 1. Validate options: --issue and --all-open mutual exclusivity
+    # 1. Validate options
     if issue is not None and all_open:
         print_error("Cannot pass both --issue and --all-open. Please select only one.")
         sys.exit(1)
@@ -98,6 +113,28 @@ def main(
             click.echo(f"[+] No matching issues found for {owner}/{repo_name}.")
         else:
             print_issues_table(issues)
+
+            # 5. Agent Skill Layer Integration
+            if agent_skills:
+                click.echo("[*] Executing Agent Skill Layer (issue-triage, priority-ranker, duplicate-detector)...")
+                classifications = {}
+                classified_list = []
+                duplicates = []
+
+                for item in issues:
+                    cls_res = classify_issue(item)
+                    num_key = cls_res.get("issue_number")
+                    classifications[num_key] = cls_res
+                    classified_list.append(cls_res)
+
+                    dup_res = detect_duplicates(item, issues)
+                    duplicates.append(dup_res)
+
+                ranked_list = rank_priorities(classified_list)
+                print_priority_table(ranked_list, classifications)
+
+                summary_text = build_triage_summary(classified_list, duplicates)
+                print_summary_panel(summary_text)
 
             if not no_report:
                 report_path = write_report(owner, repo_name, issues, output_path=output)

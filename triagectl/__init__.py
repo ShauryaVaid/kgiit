@@ -17,6 +17,12 @@ from triagectl.formatting import (
 from triagectl.report import (
     write_report,
 )
+from triagectl.skills import (
+    classify_issue,
+    detect_duplicates,
+    rank_priorities,
+    build_triage_summary,
+)
 
 __version__ = "0.1.0"
 
@@ -30,4 +36,8 @@ __all__ = [
     "print_issues_table",
     "print_error",
     "write_report",
+    "classify_issue",
+    "detect_duplicates",
+    "rank_priorities",
+    "build_triage_summary",
 ]

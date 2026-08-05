@@ -5,7 +5,6 @@ from rich.panel import Panel
 from rich.table import Table
 
 
-# Pre-defined palette of colors for label chips
 LABEL_COLORS = [
     "cyan",
     "magenta",
@@ -56,7 +55,7 @@ def print_banner(repo: str, console: Optional[Console] = None) -> Panel:
     panel = Panel(
         banner_content,
         title="[bold magenta]Triage Control Center[/bold magenta]",
-        subtitle="[dim]GitHub Issue Overview[/dim]",
+        subtitle="[dim]Agent Skill Layer Enabled[/dim]",
         border_style="bright_blue",
         padding=(1, 2),
     )
@@ -97,6 +96,65 @@ def print_issues_table(issues: List[Dict[str, Any]], console: Optional[Console] 
 
     console.print(table)
     return table
+
+
+def print_priority_table(ranked_issues: List[Dict[str, Any]], classifications: Dict[str, Dict[str, Any]], console: Optional[Console] = None) -> Table:
+    """
+    Render agent skill priority ranking & severity classification table.
+    """
+    if console is None:
+        console = Console()
+
+    table = Table(
+        title="[bold yellow]Agent Skill Layer: Issue Priority & Severity Ranking[/bold yellow]",
+        show_header=True,
+        header_style="bold cyan",
+        border_style="blue",
+    )
+
+    table.add_column("Rank", style="bold yellow", justify="center", width=6)
+    table.add_column("Issue", style="bold cyan", justify="right", width=8)
+    table.add_column("Severity", justify="center", width=10)
+    table.add_column("Category", style="bold magenta", width=14)
+    table.add_column("Assignee", style="bold white", width=12)
+    table.add_column("Rationale", style="dim white")
+
+    for item in ranked_issues:
+        rank_str = f"#{item.get('rank')}"
+        num_str = item.get("issue_number")
+        
+        info = classifications.get(num_str, {})
+        sev = info.get("severity", "LOW")
+        if sev == "HIGH":
+            sev_styled = "[bold black on bright_red] HIGH [/bold black on bright_red]"
+        elif sev == "MEDIUM":
+            sev_styled = "[bold black on yellow] MEDIUM [/bold black on yellow]"
+        else:
+            sev_styled = "[bold black on green] LOW [/bold black on green]"
+
+        label_str = info.get("label", "uncategorized")
+        owner_str = info.get("owner", "unassigned")
+        reason_str = item.get("reason", "")
+
+        table.add_row(rank_str, num_str, sev_styled, label_str, owner_str, reason_str)
+
+    console.print(table)
+    return table
+
+
+def print_summary_panel(summary_text: str, console: Optional[Console] = None) -> Panel:
+    """Print an agent skill summary panel."""
+    if console is None:
+        console = Console()
+
+    panel = Panel(
+        f"[bold white]{summary_text}[/bold white]",
+        title="[bold green]Agent Triage Summary[/bold green]",
+        border_style="bold green",
+        padding=(1, 2),
+    )
+    console.print(panel)
+    return panel
 
 
 def print_error(message: str, console: Optional[Console] = None) -> None:
