@@ -20,6 +20,7 @@ const elements = {
   btnNext: document.getElementById('btn-next'),
   btnSkip: document.getElementById('btn-skip'),
   btnReset: document.getElementById('btn-reset'),
+  btnQuit: document.getElementById('btn-quit'),
   progressBar: document.getElementById('progress-bar'),
 };
 
@@ -202,6 +203,12 @@ elements.btnSkip.addEventListener('click', () => {
 elements.btnReset.addEventListener('click', () => {
   setupLesson(currentLessonIndex);
 });
+
+if (elements.btnQuit) {
+  elements.btnQuit.addEventListener('click', () => {
+    window.close();
+  });
+}
 
 // Init
 window.onload = startSession;

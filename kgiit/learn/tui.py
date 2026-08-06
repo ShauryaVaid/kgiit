@@ -213,7 +213,7 @@ class LearnApp(App):
                 )
             yield StatusPane(id="status-pane")
         yield Input(
-            placeholder="Type a git command and press Enter... (hint: type 'hint', 'next', 'reset step', or 'quit')",
+            placeholder="Type a git command and press Enter... (hint: type 'skip', 'tracks', 'hint', 'reset', or 'quit')",
             id="input-bar",
         )
         yield Footer()
@@ -274,8 +274,8 @@ class LearnApp(App):
 
         log.write(f"\n[dim]{'─' * 60}[/dim]")
         log.write(
-            "[dim]Meta-commands: [bold]hint[/bold] | [bold]next[/bold] | "
-            "[bold]reset step[/bold] | [bold]quit[/bold][/dim]\n"
+            "[dim]Meta-commands: [bold]hint[/bold] | [bold]skip[/bold] | "
+            "[bold]tracks[/bold] | [bold]reset[/bold] | [bold]quit[/bold][/dim]\n"
         )
 
     def _show_completion(self) -> None:
@@ -330,11 +330,18 @@ class LearnApp(App):
         elif cmd_lower == "hint":
             self.action_show_hint()
             return
-        elif cmd_lower == "next":
+        elif cmd_lower in ("next", "skip"):
             self.action_next_lesson()
             return
         elif cmd_lower in ("reset step", "reset"):
             self.action_reset_step()
+            return
+        elif cmd_lower in ("tracks", "list", "courses"):
+            from kgiit.learn.curriculum import ALL_TRACKS
+            log.write("\n[bold cyan]Available Tracks:[/bold cyan]")
+            for t in ALL_TRACKS:
+                log.write(f"  • [bold]{t.title}[/bold] ({len(t.lessons)} lessons)")
+            log.write("[dim]To switch tracks, type 'quit' and run 'kgiit learn' again to select a new one.[/dim]")
             return
 
         # Execute the command in the sandbox
@@ -377,7 +384,7 @@ class LearnApp(App):
             for line in verify_result.message.split("\n"):
                 log.write(f"[green]{line}[/green]")
             log.write(
-                "\n[dim]Type [bold]next[/bold] to continue to the next lesson.[/dim]"
+                "\n[dim]Type [bold]skip[/bold] or [bold]next[/bold] to continue to the next lesson.[/dim]"
             )
         elif not verify_result.passed:
             # Call ML classifier for a hint
