@@ -68,20 +68,38 @@ To exit the application, simply type `/bye` or `q`.
 
 ## 📁 Project Structure
 
-```text
-KGiit/
-├── kgiit/                  # Core Python Package
-│   ├── cli.py              # Main Application Entrypoint & Cyberpunk UI
-│   ├── analyze/            # Real-world GitHub Triage Engine
-│   ├── learn/              # Offline Git Sandbox & Server
-│   └── skills/             # Agentic ML Skills & Instructions
-├── gui/                    # Electron-based Visual Interface
-│   ├── main.js             # Electron Application Bootstrapper
-│   └── styles.css          # Core Styling & Theme tokens
-├── tests/                  # Pytest Validation Suite (90+ Passing Tests)
-├── ARCHITECTURE.md         # Deep-dive into internal logic
-├── CONTRIBUTING.md         # How to contribute to KGiit
-└── setup.py                # Package installation definitions
+```mermaid
+graph TD
+    A[KGiit Repository]
+    
+    A --> B(kgiit/ Core Python Package)
+    A --> C(gui/ Electron Interface)
+    A --> D(tests/ Validation Suite)
+    A --> E(Documentation)
+    
+    B --> B1[cli.py: Main Entrypoint]
+    B --> B2[analyze/: Triage Engine]
+    B --> B3[learn/: Offline Sandbox]
+    B --> B4[skills/: ML Skills]
+    
+    C --> C1[main.js: Bootstrapper]
+    C --> C2[styles.css: Cyberpunk Theme]
+```
+
+## 🧠 System Workflow
+
+```mermaid
+flowchart LR
+    User([Developer / Student]) --> CLI[kgiit CLI]
+    CLI -->|kgiit analyze| A[Analyze Engine]
+    CLI -->|kgiit learn| L[Learn Engine]
+    
+    A -->|Fetches Issues| API[(GitHub API)]
+    A -->|Categorizes| NLP[ML NLP Classifier]
+    
+    L -->|Hosts| S[FastAPI Server]
+    S -->|Renders| G[Electron GUI]
+    L -->|Executes in| Sandbox[Offline Git Sandbox]
 ```
 
 ---
