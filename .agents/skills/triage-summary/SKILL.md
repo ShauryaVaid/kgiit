@@ -1,11 +1,11 @@
 ---
-name: triage-summary
-description: Generates a concise plain-text summary paragraph of issue triage results for CLI output. Use when asked to summarize triage findings or CLI results.
+name: analyze-summary
+description: Generates a concise plain-text summary paragraph of issue analyze results for CLI output. Use when asked to summarize analyze findings or CLI results.
 ---
 
-# Triage Summary
+# Analyze Summary
 
-This skill provides instructions for generating a concise, human-readable plain-text summary of issue triage results suitable for CLI output.
+This skill provides instructions for generating a concise, human-readable plain-text summary of issue analyze results suitable for CLI output.
 
 ## Input
 

@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 import requests
 
-from triagectl.github_client import (
+from kgiit.analyze.github_client import (
     GitHubClient,
     GitHubAPIError,
     GitHubNotFoundError,

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>kgiit learn</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <div id="titlebar">kgiit learn - <span id="track-title">Loading...</span></div>
+  
+  <div id="app-container">
+    <div id="main-pane">
+      <div id="lesson-pane">
+        <h2 id="lesson-title">Lesson</h2>
+        <div id="lesson-prompt"></div>
+      </div>
+      
+      <div id="terminal-pane">
+        <div id="scrollback"></div>
+        <div id="input-line">
+          <span id="prompt-symbol">$</span>
+          <input type="text" id="cmd-input" autofocus autocomplete="off" spellcheck="false" placeholder="Type a git command...">
+        </div>
+      </div>
+    </div>
+    
+    <div id="status-pane">
+      <h3>Sandbox Status</h3>
+      <div class="status-item">
+        <div class="status-label">Branch</div>
+        <div class="status-value" id="status-branch">-</div>
+      </div>
+      <div class="status-item">
+        <div class="status-label">Staged</div>
+        <div class="status-value" id="status-staged">-</div>
+      </div>
+      <div class="status-item">
+        <div class="status-label">Unstaged</div>
+        <div class="status-value" id="status-unstaged">-</div>
+      </div>
+      <div class="status-item">
+        <div class="status-label">Untracked</div>
+        <div class="status-value" id="status-untracked">-</div>
+      </div>
+      <div class="status-item">
+        <div class="status-label">Last Commit</div>
+        <div class="status-value" id="status-commit">-</div>
+      </div>
+      
+      <div class="controls">
+        <button id="btn-next" disabled>Next Lesson</button>
+        <button id="btn-reset">Reset Lesson</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

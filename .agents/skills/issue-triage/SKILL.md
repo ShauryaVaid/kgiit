@@ -1,9 +1,9 @@
 ---
-name: issue-triage
-description: Classifies a GitHub issue's title and body text into severity, label, owner, and reason. Use when asked to triage, classify, or label GitHub issues.
+name: issue-analyze
+description: Classifies a GitHub issue's title and body text into severity, label, owner, and reason. Use when asked to analyze, classify, or label GitHub issues.
 ---
 
-# Issue Triage
+# Issue Analyze
 
 This skill provides instructions for analyzing a GitHub issue's title and body text and outputting a structured JSON classification.
 

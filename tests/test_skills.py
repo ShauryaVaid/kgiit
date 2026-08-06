@@ -1,9 +1,9 @@
 import unittest
-from triagectl.skills import (
+from kgiit.analyze.skills import (
     classify_issue,
     detect_duplicates,
     rank_priorities,
-    build_triage_summary,
+    build_analyze_summary,
 )
 
 
@@ -59,13 +59,13 @@ class TestSkills(unittest.TestCase):
         self.assertEqual(ranked[1]["issue_number"], "#3")
         self.assertEqual(ranked[2]["issue_number"], "#2")
 
-    def test_build_triage_summary(self):
+    def test_build_analyze_summary(self):
         classified = [
             {"severity": "HIGH", "label": "bug/auth", "owner": "unassigned"},
             {"severity": "HIGH", "label": "bug/auth", "owner": "@alex"},
             {"severity": "LOW", "label": "docs", "owner": "unassigned"},
         ]
-        summary = build_triage_summary(classified)
+        summary = build_analyze_summary(classified)
         self.assertIn("2 HIGH severity issues need attention, mostly in bug/auth.", summary)
         self.assertIn("2 issues remain unassigned.", summary)
 

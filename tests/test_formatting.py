@@ -3,7 +3,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from triagectl.formatting import (
+from kgiit.analyze.formatting import (
     format_labels,
     truncate_text,
     print_banner,

@@ -1,1 +1,1 @@
-# tests package
+"""Tests for kgiit — package-level smoke tests."""
