@@ -161,4 +161,6 @@ For further technical details and contribution guidelines, please refer to the s
 <div align="center">
   <b>Authored by Shaurya Vaid</b> <br/>
   <i>Building robust tooling for modern engineering education.</i>
+  <br/><br/>
+  <b>Contributors:</b> Aditya Tiwari and Mihir Bagh
 </div>
