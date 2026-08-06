@@ -119,7 +119,7 @@ def print_priority_table(ranked_issues: list[dict[str, Any]], classifications: d
     table.add_column("Rank", style="bold yellow", justify="center", width=6)
     table.add_column("Issue", style="bold cyan", justify="right", width=8)
     table.add_column("Severity", justify="center", width=10)
-    table.add_column("Category", style="bold magenta", width=14)
+    table.add_column("Category", style="bold magenta", min_width=15)
     table.add_column("Assignee", style="bold white", width=12)
     table.add_column("Rationale", style="dim white")
 

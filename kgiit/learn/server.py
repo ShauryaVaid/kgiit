@@ -8,7 +8,7 @@ import subprocess
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-from kgiit.learn.curriculum import get_track
+from kgiit.learn.curriculum import get_track, ALL_TRACKS
 from kgiit.learn.ml.classifier import classify_mistake
 from kgiit.learn.sandbox import SandboxSession, SandboxCommandError
 
@@ -23,6 +23,18 @@ class TrackStartRequest(BaseModel):
 
 class ExecuteRequest(BaseModel):
     command: str
+
+@app.get("/api/tracks")
+def list_tracks():
+    return [
+        {
+            "id": t.id,
+            "title": t.title,
+            "description": t.description,
+            "lessons_count": len(t.lessons)
+        }
+        for t in ALL_TRACKS
+    ]
 
 @app.post("/api/session/start")
 def start_session(req: TrackStartRequest):

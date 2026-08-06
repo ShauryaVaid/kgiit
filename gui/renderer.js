@@ -22,6 +22,9 @@ const elements = {
   btnReset: document.getElementById('btn-reset'),
   btnQuit: document.getElementById('btn-quit'),
   progressBar: document.getElementById('progress-bar'),
+  trackModal: document.getElementById('track-modal'),
+  trackList: document.getElementById('track-list'),
+  btnCloseModal: document.getElementById('btn-close-modal'),
 };
 
 function appendToScrollback(html) {
@@ -205,8 +208,39 @@ elements.btnReset.addEventListener('click', () => {
 });
 
 if (elements.btnQuit) {
-  elements.btnQuit.addEventListener('click', () => {
-    window.close();
+  elements.btnQuit.addEventListener('click', async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/tracks`);
+      const tracks = res.data;
+      elements.trackList.innerHTML = '';
+      
+      tracks.forEach(track => {
+        const div = document.createElement('div');
+        div.className = 'track-item';
+        div.innerHTML = `
+          <div class="track-title">${track.title}</div>
+          <div class="track-desc">${track.description} (${track.lessons_count} lessons)</div>
+        `;
+        div.addEventListener('click', () => {
+          trackId = track.id;
+          elements.trackModal.style.display = 'none';
+          elements.scrollback.innerHTML = '';
+          startSession();
+        });
+        elements.trackList.appendChild(div);
+      });
+      
+      elements.trackModal.style.display = 'block';
+    } catch (e) {
+      console.error('Failed to load tracks', e);
+      appendError('Failed to load available tracks from server.');
+    }
+  });
+}
+
+if (elements.btnCloseModal) {
+  elements.btnCloseModal.addEventListener('click', () => {
+    elements.trackModal.style.display = 'none';
   });
 }
 

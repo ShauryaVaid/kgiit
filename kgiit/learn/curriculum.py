@@ -488,6 +488,105 @@ LESSON_MERGE = Lesson(
 
 
 # ---------------------------------------------------------------------------
+# Lesson 7: git clone
+# ---------------------------------------------------------------------------
+
+def _verify_clone(sandbox: SandboxSession, result: subprocess.CompletedProcess) -> VerifyResult:
+    if result.returncode != 0:
+        return VerifyResult(False, f"git clone failed: {result.stderr.strip()}")
+    if not _git_dir_exists(sandbox):
+        return VerifyResult(False, "The repository was not cloned successfully. Try: git clone ../remote.git .")
+    return VerifyResult(True, "✓ Repository cloned successfully!\n\nNotice the '.' at the end? That tells git to clone directly into your current directory instead of creating a new folder.")
+
+LESSON_CLONE = Lesson(
+    id="collab-01-clone",
+    title="Lesson 1: Clone a Repository",
+    concept="git clone downloads an existing remote repository to your local machine.",
+    instructions=(
+        "To work with others, you usually start by cloning an existing repository.\n\n"
+        "We've set up a simulated remote repository at '../remote.git'.\n"
+        "Clone it directly into your current (empty) directory by adding a '.' at the end:\n\n"
+        "  git clone ../remote.git .\n\n"
+        "The '.' is important—it means 'put the files right here' instead of making a new folder."
+    ),
+    target_command="git clone ../remote.git .",
+    fixture="remote_sim",
+    verify=_verify_clone,
+    hint="Try: git clone ../remote.git .",
+)
+
+# ---------------------------------------------------------------------------
+# Lesson 8: git push
+# ---------------------------------------------------------------------------
+
+def _setup_push(sandbox: SandboxSession) -> None:
+    sandbox.run(["git", "clone", "../remote.git", "."])
+    sandbox.create_file("hello.txt", "Hello remote!")
+    sandbox.run(["git", "add", "hello.txt"])
+    sandbox.run(["git", "commit", "-m", "Add hello.txt"])
+
+def _verify_push(sandbox: SandboxSession, result: subprocess.CompletedProcess) -> VerifyResult:
+    if result.returncode != 0:
+        return VerifyResult(False, f"git push failed: {result.stderr.strip()}")
+    return VerifyResult(True, "✓ Code pushed to the remote repository!\n\nYour teammates can now see your commit.")
+
+LESSON_PUSH = Lesson(
+    id="collab-02-push",
+    title="Lesson 2: Push Changes",
+    concept="git push uploads your local commits to a remote repository.",
+    instructions=(
+        "You've cloned the repository and made a new commit locally.\n\n"
+        "To share this commit with the world, you must push it to the remote server.\n\n"
+        "Push your changes to the default branch (main):\n\n"
+        "  git push origin main"
+    ),
+    target_command="git push origin main",
+    fixture="remote_sim",
+    verify=_verify_push,
+    hint="Try: git push origin main",
+    setup_steps=[_setup_push],
+    allow_alternate_commands=["git push"],
+)
+
+# ---------------------------------------------------------------------------
+# Lesson 9: git pull
+# ---------------------------------------------------------------------------
+
+def _setup_pull(sandbox: SandboxSession) -> None:
+    sandbox.run(["git", "clone", "../remote.git", "."])
+    tmp_clone = sandbox.root / "tmp_clone"
+    sandbox.run(["git", "clone", "../remote.git", str(tmp_clone)])
+    new_file = tmp_clone / "update.txt"
+    new_file.write_text("An update from a teammate!")
+    sandbox.run(["git", "add", "update.txt"], cwd=tmp_clone)
+    sandbox.run(["git", "commit", "-m", "Add update.txt"], cwd=tmp_clone)
+    sandbox.run(["git", "push", "origin", "main"], cwd=tmp_clone)
+
+def _verify_pull(sandbox: SandboxSession, result: subprocess.CompletedProcess) -> VerifyResult:
+    if result.returncode != 0:
+        return VerifyResult(False, f"git pull failed: {result.stderr.strip()}")
+    if not (sandbox.repo_dir / "update.txt").exists():
+        return VerifyResult(False, "The update from the teammate is missing. Try running: git pull origin main")
+    return VerifyResult(True, "✓ Code pulled successfully!\n\nYou now have your teammate's changes on your local machine.")
+
+LESSON_PULL = Lesson(
+    id="collab-03-pull",
+    title="Lesson 3: Pull Changes",
+    concept="git pull downloads commits from the remote repository and merges them into your local branch.",
+    instructions=(
+        "A teammate just pushed a new commit to the remote repository!\n\n"
+        "Your local repository is now out of date. To fetch their changes and merge them into your local branch, use:\n\n"
+        "  git pull origin main"
+    ),
+    target_command="git pull origin main",
+    fixture="remote_sim",
+    verify=_verify_pull,
+    hint="Try: git pull origin main",
+    setup_steps=[_setup_pull],
+    allow_alternate_commands=["git pull"],
+)
+
+# ---------------------------------------------------------------------------
 # Track definitions
 # ---------------------------------------------------------------------------
 
@@ -505,7 +604,14 @@ BRANCHING_TRACK = Track(
     lessons=[LESSON_BRANCH, LESSON_MERGE],
 )
 
-ALL_TRACKS: list[Track] = [GIT_BASICS_TRACK, BRANCHING_TRACK]
+COLLABORATION_TRACK = Track(
+    id="collaboration",
+    title="Remotes & Collaboration",
+    description="Work with others: clone a repo, push your commits, and pull updates.",
+    lessons=[LESSON_CLONE, LESSON_PUSH, LESSON_PULL],
+)
+
+ALL_TRACKS: list[Track] = [GIT_BASICS_TRACK, BRANCHING_TRACK, COLLABORATION_TRACK]
 
 
 def get_track(track_id: str) -> Track | None:

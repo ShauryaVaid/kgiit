@@ -301,6 +301,7 @@ class SandboxSession:
             "committed": self._seed_committed,
             "branched": self._seed_branched,
             "conflict": self._seed_conflict,
+            "remote_sim": self._seed_remote_sim,
         }
 
         seeder = seeders.get(fixture)
@@ -369,6 +370,15 @@ class SandboxSession:
         )
         # Return to main (merge will be done by the lesson)
         self.run(["git", "switch", "main"], cwd=self.repo_dir, check=True)
+
+    def _seed_remote_sim(self) -> None:
+        """Create a bare repository acting as a remote and an empty sandbox."""
+        remote_dir = self.root / "remote.git"
+        remote_dir.mkdir(parents=True, exist_ok=True)
+        self.run(["git", "init", "--bare", "--initial-branch=main"], cwd=remote_dir, check=True)
+        
+        # User will start in an empty repo_dir to clone the remote
+        self.repo_dir.mkdir(parents=True, exist_ok=True)
 
 
 def list_sessions() -> list[str]:
