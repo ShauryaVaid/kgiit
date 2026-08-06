@@ -10,7 +10,7 @@ from pydantic import BaseModel
 
 from kgiit.learn.curriculum import get_track
 from kgiit.learn.ml.classifier import classify_mistake
-from kgiit.learn.sandbox import SandboxSession
+from kgiit.learn.sandbox import SandboxSession, SandboxCommandError
 
 app = FastAPI(title="kgiit GUI Bridge")
 
@@ -34,7 +34,14 @@ def start_session(req: TrackStartRequest):
     first_lesson = track.lessons[0]
     session = SandboxSession(first_lesson.fixture)
     _sessions[session.session_id] = session
-    return {"session_id": session.session_id, "track_title": track.title, "lesson_title": first_lesson.title, "lesson_prompt": first_lesson.instructions}
+    return {
+        "session_id": session.session_id, 
+        "track_title": track.title, 
+        "lesson_title": first_lesson.title, 
+        "lesson_prompt": first_lesson.instructions,
+        "total_lessons": len(track.lessons),
+        "current_index": 0
+    }
 
 @app.post("/api/session/{session_id}/execute")
 def execute_command(session_id: str, req: ExecuteRequest):
@@ -44,15 +51,36 @@ def execute_command(session_id: str, req: ExecuteRequest):
     session = _sessions[session_id]
     command = req.command.strip()
     
-    # Execute the command in the sandbox
-    proc = session.run(command)
-    
-    return {
-        "command": command,
-        "exit_code": proc.returncode,
-        "stdout": proc.stdout,
-        "stderr": proc.stderr
-    }
+    try:
+        proc = session.run_user_command(command)
+        return {
+            "command": command,
+            "exit_code": proc.returncode,
+            "stdout": proc.stdout,
+            "stderr": proc.stderr
+        }
+    except SandboxCommandError as e:
+        return {
+            "command": command,
+            "exit_code": 1,
+            "stdout": "",
+            "stderr": str(e)
+        }
+    except FileNotFoundError:
+        binary = command.split()[0] if command else "Command"
+        return {
+            "command": command,
+            "exit_code": 127,
+            "stdout": "",
+            "stderr": f"{binary}: command not found (Note: shell built-ins like 'cd' are not supported in this sandbox)"
+        }
+    except Exception as e:
+        return {
+            "command": command,
+            "exit_code": 1,
+            "stdout": "",
+            "stderr": f"System Error: {e}"
+        }
 
 @app.get("/api/session/{session_id}/status")
 def get_status(session_id: str):
@@ -117,7 +145,9 @@ def setup_lesson(session_id: str, lesson_index: int, req: dict):
     
     return {
         "lesson_title": lesson.title,
-        "lesson_prompt": lesson.instructions
+        "lesson_prompt": lesson.instructions,
+        "total_lessons": len(track.lessons),
+        "current_index": lesson_index
     }
 
 @app.post("/api/session/{session_id}/stop")

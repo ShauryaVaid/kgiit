@@ -6,7 +6,7 @@ function createWindow() {
     width: 900,
     height: 700,
     titleBarStyle: 'hiddenInset', // macOS terminal style
-    backgroundColor: '#110b17',
+    backgroundColor: '#161b22',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,

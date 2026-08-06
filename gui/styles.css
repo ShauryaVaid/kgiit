@@ -1,15 +1,15 @@
 :root {
-  --bg-color: #110b17; /* Fallback */
-  --bg-gradient: linear-gradient(135deg, #0f0c1b 0%, #171124 50%, #201124 100%);
-  --panel-bg: #1c142b;
-  --border-color: #38255c;
-  --text-color: #d1c4e9;
-  --text-bright: #ffffff;
-  --accent: #ff69b4;
-  --success: #a371f7;
-  --error: #ff4d4d;
+  --bg-color: #121317; /* Slate dark */
+  --bg-gradient: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #121317 100%);
+  --panel-bg: #161b22;
+  --border-color: #30363d;
+  --text-color: #a0a5b5;
+  --text-bright: #fdfbfb;
+  --accent: #00f2fe; /* Diamond Blue */
+  --success: #00f2fe;
+  --error: #ff4b91;
   --warning: #ffb84d;
-  --hint: #ff80df;
+  --hint: #b15eff;
   --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", monospace;
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
@@ -65,6 +65,23 @@ body {
   margin-top: 0;
   color: var(--accent);
   font-size: 1.2rem;
+  margin-bottom: 4px;
+}
+
+#progress-container {
+  width: 100%;
+  height: 4px;
+  background-color: var(--border-color);
+  margin-bottom: 15px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+#progress-bar {
+  height: 100%;
+  background-color: var(--accent);
+  width: 0%;
+  transition: width 0.3s ease;
 }
 
 #lesson-prompt {
@@ -207,7 +224,7 @@ button {
 }
 
 button:hover:not(:disabled) {
-  background-color: #a371f7;
+  background-color: #4facfe;
 }
 
 button:disabled {

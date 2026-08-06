@@ -3,7 +3,8 @@ const API_BASE = 'http://localhost:8000/api';
 // Simple state
 let sessionId = null;
 let currentLessonIndex = 0;
-let trackId = process.env.TRACK_ID || 'git-basics'; // passed from python if possible, or fallback
+let totalLessons = 1;
+let trackId = window.api ? window.api.getTrackId() : 'git-basics';
 
 const elements = {
   trackTitle: document.getElementById('track-title'),
@@ -17,7 +18,9 @@ const elements = {
   statusUntracked: document.getElementById('status-untracked'),
   statusCommit: document.getElementById('status-commit'),
   btnNext: document.getElementById('btn-next'),
+  btnSkip: document.getElementById('btn-skip'),
   btnReset: document.getElementById('btn-reset'),
+  progressBar: document.getElementById('progress-bar'),
 };
 
 function appendToScrollback(html) {
@@ -25,6 +28,13 @@ function appendToScrollback(html) {
   div.innerHTML = html;
   elements.scrollback.appendChild(div);
   elements.scrollback.scrollTop = elements.scrollback.scrollHeight;
+}
+
+function updateProgress() {
+  if (totalLessons > 0) {
+    const percent = Math.min(100, Math.round((currentLessonIndex / totalLessons) * 100));
+    elements.progressBar.style.width = `${percent}%`;
+  }
 }
 
 function appendCommand(cmd) {
@@ -69,14 +79,16 @@ async function updateStatus() {
 
 async function startSession() {
   try {
-    const args = require('electron').remote?.process.argv || [];
-    // simple arg parsing if needed, but hardcoding trackId for now
-    
+    // No remote require in context isolation
     const res = await axios.post(`${API_BASE}/session/start`, { track_id: trackId });
     sessionId = res.data.session_id;
+    totalLessons = res.data.total_lessons || 1;
+    currentLessonIndex = res.data.current_index || 0;
+    
     elements.trackTitle.textContent = res.data.track_title;
     elements.lessonTitle.textContent = res.data.lesson_title;
     elements.lessonPrompt.innerHTML = res.data.lesson_prompt.replace(/\n/g, '<br>');
+    updateProgress();
     await updateStatus();
   } catch (e) {
     console.error('Failed to start session', e);
@@ -92,24 +104,31 @@ async function setupLesson(index) {
     
     if (res && res.status === 400 && res.data.detail === "Invalid track or lesson") {
       // Track complete
+      currentLessonIndex = totalLessons;
+      updateProgress();
       elements.lessonTitle.textContent = "Track Complete!";
       elements.lessonPrompt.innerHTML = `
         <div style="color:var(--success); font-size:1.1em; margin-bottom:15px;">🏆 TRACK COMPLETION CERTIFICATE 🏆</div>
         <div>Status: PASSED</div><br>
-        <div style="color:var(--accent);">Ready to try this on a real repository?</div>
-        <div>Run: <code style="color:var(--warning);">kgiit triage --repo &lt;owner/name&gt;</code></div>
+        <div style="color:var(--accent);">Ready to use your new skills on a real GitHub repository?</div>
+        <div>Exit this sandbox and select <b>Door 1</b> from the main menu, or run:</div>
+        <div><code style="color:var(--warning);">kgiit analyze --repo &lt;owner/name&gt;</code></div>
       `;
       elements.btnNext.disabled = true;
+      elements.btnSkip.disabled = true;
       elements.cmdInput.disabled = true;
       appendToScrollback(`<hr style="border-color:#333; margin: 15px 0;">`);
       appendSuccess("Track Complete! You can close this window now.");
       return;
     }
     
-    currentLessonIndex = index;
+    currentLessonIndex = res.data.current_index !== undefined ? res.data.current_index : index;
+    totalLessons = res.data.total_lessons || totalLessons;
+    
     elements.lessonTitle.textContent = res.data.lesson_title;
     elements.lessonPrompt.innerHTML = res.data.lesson_prompt.replace(/\n/g, '<br>');
     elements.btnNext.disabled = true;
+    updateProgress();
     appendToScrollback(`<hr style="border-color:#333; margin: 15px 0;">`);
     await updateStatus();
   } catch (e) {
@@ -173,6 +192,10 @@ elements.cmdInput.addEventListener('keydown', (e) => {
 });
 
 elements.btnNext.addEventListener('click', () => {
+  setupLesson(currentLessonIndex + 1);
+});
+
+elements.btnSkip.addEventListener('click', () => {
   setupLesson(currentLessonIndex + 1);
 });
 

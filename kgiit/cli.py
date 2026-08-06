@@ -62,7 +62,7 @@ def _print_kgiit_banner() -> None:
     # 3) Enclose in a massive full-width double-lined purple box
     logo_panel = Panel(
         banner,
-        border_style="#b15eff",
+        border_style="#00f2fe",
         box=box.DOUBLE,
         padding=(2, 2),
         expand=True
