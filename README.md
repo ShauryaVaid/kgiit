@@ -4,7 +4,6 @@
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/release/python-3100/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](https://opensource.org/licenses/MIT)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()
 
 <br/>
 
@@ -22,51 +21,56 @@
 
 ---
 
-## 🚀 Overview
+## Overview
 
-**KGiit** is a powerful, dual-engine Command Line Interface designed for modern developers and students. It acts as both a safe offline learning sandbox and a real-world repository analyzer. 
+**KGiit** is an advanced, dual-engine Command Line Interface designed for modern software engineering education and repository management. It serves as both a completely offline educational sandbox for mastering Git workflows and an active, network-connected diagnostic engine for analyzing live GitHub repositories.
 
-Built with a cyberpunk-inspired dynamic TUI (Terminal User Interface), KGiit seamlessly blends high-performance backend logic with an incredible user experience.
+Built with a high-performance Python backend and an integrated dynamic Terminal User Interface (TUI), KGiit seamlessly bridges the gap between learning theoretical version control concepts and executing them in real-world scenarios.
 
-- **Door 1: Analyze (`kgiit analyze`)**: Connect directly to live GitHub repositories to pull, analyze, and diagnose real-world issues.
-- **Door 2: Learn (`kgiit learn`)**: Step into a 100% offline, safe sandbox to practice Git commands without fear of breaking production.
-
-## 🧠 Machine Learning Engine
-
-KGiit is not just a standard CLI; it is powered by **custom-trained Machine Learning models**. 
-- **Typo Correction & Command Classification**: If a student mistypes a Git command in the sandbox, KGiit's ML engine kicks in, predicting what they meant to type and providing intelligent, context-aware hints.
-- **Issue Triage**: The analyzer uses NLP to categorize and prioritize GitHub issues automatically.
+- **Analyze Mode (`kgiit analyze`)**: An internet-connected triage engine that interfaces directly with the GitHub API. It pulls live repository issues and utilizes Natural Language Processing (NLP) to categorize, prioritize, and diagnose real-world software defects.
+- **Learn Mode (`kgiit learn`)**: A 100% offline, isolated sandbox environment. It allows students to practice destructive Git commands safely without the risk of affecting production environments or modifying the host operating system's global Git configuration.
 
 ---
 
-## 🛠️ Quickstart Guide
+## Machine Learning Integration
 
-### Installation
-Ensure you have Python 3.10+ installed.
+KGiit differentiates itself from standard terminal utilities through its integration of custom-trained, locally executing Machine Learning models.
 
-```bash
-git clone https://github.com/ShauryaVaid/kgiit.git
-cd kgiit
-pip install -e .
-```
+### Typo Correction & Command Classification
+In the offline learning sandbox, students often make syntactical errors when attempting complex Git commands. KGiit intercepts these failures and passes the erroneous input through a localized classification model. The model calculates string distance heuristics and semantic intent to predict the user's intended Git command, providing immediate, context-aware pedagogical hints rather than standard terminal error codes.
 
-### Usage
-Start the interactive, full-screen cyberpunk menu simply by typing:
-
-```bash
-kgiit
-```
-
-From here, you can select:
-1. **Analyze Mode**: Requires internet and an optional `GITHUB_TOKEN`.
-2. **Learn Mode**: Fully offline. Launch the GUI or terminal practice environment.
-3. **Demo Mode**: Watch an automated hands-free walkthrough.
-
-To exit the application, simply type `/bye` or `q`.
+### NLP Issue Triage Engine
+When executing `kgiit analyze`, the system retrieves raw issue data from GitHub. The embedded NLP classifier analyzes the unstructured text of issue titles and bodies, extracting semantic meaning to automatically assign severity rankings (HIGH, MEDIUM, LOW) and categorical labels (bug, docs, enhancement). This drastically reduces the manual overhead required for repository maintainers to triage incoming tickets.
 
 ---
 
-## 📁 Project Structure
+## Interactive Curriculum
+
+The KGiit Learn Engine includes a comprehensive, interactive curriculum designed to take users from absolute beginners to collaborative engineers. The curriculum is divided into three primary tracks:
+
+### 1. Git Basics
+Focuses on the foundational operations required for local version control.
+- **Lesson 1: Initialize a Repository** (`git init`)
+- **Lesson 2: Check Repository Status** (`git status`)
+- **Lesson 3: Stage a File** (`git add`)
+- **Lesson 4: Make a Commit** (`git commit`)
+
+### 2. Branching & Merging
+Introduces parallel development concepts and non-linear history management.
+- **Lesson 1: Create & Switch Branches** (`git branch`, `git switch`)
+- **Lesson 2: Merge Branches & Resolve Conflicts** (`git merge`) - *Includes a pre-seeded, interactive merge conflict resolution scenario.*
+
+### 3. Remotes & Collaboration
+Simulates a secure, offline network environment to teach collaborative workflows without requiring an internet connection.
+- **Lesson 1: Clone a Repository** (`git clone`)
+- **Lesson 2: Push Changes** (`git push`)
+- **Lesson 3: Pull Changes** (`git pull`)
+
+---
+
+## System Architecture
+
+### Project Structure
 
 ```mermaid
 graph TD
@@ -83,14 +87,14 @@ graph TD
     B --> B4[skills/: ML Skills]
     
     C --> C1[main.js: Bootstrapper]
-    C --> C2[styles.css: Cyberpunk Theme]
+    C --> C2[styles.css: Styling Tokens]
 ```
 
-## 🧠 System Workflow
+### Execution Workflow
 
 ```mermaid
 flowchart LR
-    User([Developer / Student]) --> CLI[kgiit CLI]
+    User([Developer / Student]) --> CLI[KGiit CLI]
     CLI -->|kgiit analyze| A[Analyze Engine]
     CLI -->|kgiit learn| L[Learn Engine]
     
@@ -104,16 +108,57 @@ flowchart LR
 
 ---
 
-## 📚 Documentation
+## Setup and Installation
 
-Dive deeper into how KGiit works and how you can get involved:
+### Prerequisites
+- Python 3.10 or higher
+- Git installed and available in the system PATH
+- Node.js (Optional, only required if modifying the Electron GUI)
 
-- [**Architecture Guide**](ARCHITECTURE.md): Learn about the system design, ML integration, and how the CLI talks to the Electron GUI.
-- [**Contributing Guidelines**](CONTRIBUTING.md): Want to add a feature? Read this first to set up your dev environment and run the test suite.
+### Installation Instructions
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/ShauryaVaid/kgiit.git
+   cd kgiit
+   ```
+
+2. **Install the Python package:**
+   It is highly recommended to install the package in editable mode so that the `kgiit` binary is automatically linked to your system PATH.
+   ```bash
+   pip install -e .
+   ```
+
+3. **Verify Installation:**
+   ```bash
+   kgiit --help
+   ```
+
+### Usage
+
+To launch the primary KGiit interface, execute:
+```bash
+kgiit
+```
+
+From the main menu, you can select the desired mode using your keyboard arrows. 
+- For the **Analyze Mode**, exporting the `GITHUB_TOKEN` environment variable is recommended to bypass standard API rate limits.
+- The **Learn Mode** operates entirely offline and requires no additional configuration.
+
+To exit the application interface at any time, type `/bye` or `q`.
+
+---
+
+## Documentation Links
+
+For further technical details and contribution guidelines, please refer to the specific documentation files included in this repository:
+
+- [System Architecture Guide](ARCHITECTURE.md) - A deep dive into the system design, ML integration, and CLI-GUI communication protocols.
+- [Contributing Guidelines](CONTRIBUTING.md) - Instructions for setting up a development environment, running the Pytest validation suite, and submitting pull requests.
 
 ---
 
 <div align="center">
   <b>Authored by Shaurya Vaid</b> <br/>
-  <i>Empowering students to master Git.</i>
+  <i>Building robust tooling for modern engineering education.</i>
 </div>
