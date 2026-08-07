@@ -69,8 +69,7 @@ def _select_track() -> Track | None:
     """Interactively select a track."""
     _print_track_menu()
     console.print(
-        f"[bold bright_white]Choose a track (1–{
-            len(ALL_TRACKS)}) or [q]uit:[/bold bright_white] ",
+        f"[bold bright_white]Choose a track (1–{len(ALL_TRACKS)}) or [q]uit:[/bold bright_white] ",
         end="")
 
     try:
@@ -136,8 +135,7 @@ def _launch_tui(track: Track, headless: bool = False) -> None:
     if headless:
         # In headless mode, run auto-pilot through the first lesson
         console.print(
-            f"[dim]Headless mode: running track '{
-                track.title}'...[/dim]")
+            f"[dim]Headless mode: running track '{track.title}'...[/dim]")
         # Textual's headless mode via run(headless=True)
         app.run(headless=True)
     else:
@@ -340,16 +338,13 @@ def demo_cmd() -> None:
 
     console.print(
         Panel(
-            f"[bold bright_cyan]kgiit demo[/bold bright_cyan]\nAutomated Walkthrough: {
-                track.title} - {
-                lesson.title}",
+            f"[bold bright_cyan]kgiit demo[/bold bright_cyan]\nAutomated Walkthrough: {track.title} - {lesson.title}",
             box=box.ROUNDED,
             border_style="cyan"))
 
     session = SandboxSession(lesson.fixture)
     console.print(
-        f"[dim]Started sandbox session: {
-            session.session_id}[/dim]\n")
+        f"[dim]Started sandbox session: {session.session_id}[/dim]\n")
 
     console.print(
         f"[bold yellow]Prompt:[/bold yellow] {lesson.instructions}\n")
@@ -372,9 +367,7 @@ def demo_cmd() -> None:
         mistake, lesson.target_command, context=session.get_state())
     time.sleep(1)
     console.print(
-        f"[bold magenta]Hint ({label} - {
-            conf *
-            100:.0f}% confidence):[/bold magenta] [italic]{hint}[/italic]\n")
+        f"[bold magenta]Hint ({label} - {conf * 100:.0f}% confidence):[/bold magenta] [italic]{hint}[/italic]\n")
     time.sleep(2)
 
     # 2. Correct command

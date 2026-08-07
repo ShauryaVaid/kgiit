@@ -84,19 +84,16 @@ class GitHubClient:
 
         if status_code == 404:
             raise GitHubNotFoundError(
-                f"Resource not found (404): {
-                    response.text}")
+                f"Resource not found (404): {response.text}")
         elif status_code == 403 and rate_limit_remaining == "0":
             raise GitHubRateLimitError(
-                f"GitHub API rate limit exceeded (403): {
-                    response.text}")
+                f"GitHub API rate limit exceeded (403): {response.text}")
         elif status_code in (401, 403):
             raise GitHubAuthError(
                 f"Authentication/Authorization error ({status_code}): {response.text}")
         else:
             raise GitHubAPIError(
-                f"GitHub API request failed with status {status_code}: {
-                    response.text}")
+                f"GitHub API request failed with status {status_code}: {response.text}")
 
     def _normalize_issue(self, raw_issue: dict[str, Any]) -> dict[str, Any]:
         """

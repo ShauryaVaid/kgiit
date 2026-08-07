@@ -1,0 +1,1033 @@
+{
+  "total_count": 7,
+  "jobs": [
+    {
+      "id": 92905423337,
+      "run_id": 31190388787,
+      "workflow_name": "CI",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/ShauryaVaid/kgiit/actions/runs/31190388787",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTv-E_s8AAAAVoZhB6Q",
+      "head_sha": "cc0e4ff073dc4d1429d65cccca673d2e20c6fc86",
+      "url": "https://api.github.com/repos/ShauryaVaid/kgiit/actions/jobs/92905423337",
+      "html_url": "https://github.com/ShauryaVaid/kgiit/actions/runs/31190388787/job/92905423337",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-08-07T14:59:44Z",
+      "started_at": "2026-08-07T14:59:47Z",
+      "completed_at": "2026-08-07T14:59:58Z",
+      "name": "Lint",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-08-07T14:59:48Z",
+          "completed_at": "2026-08-07T14:59:49Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-08-07T14:59:49Z",
+          "completed_at": "2026-08-07T14:59:51Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-08-07T14:59:51Z",
+          "completed_at": "2026-08-07T14:59:51Z"
+        },
+        {
+          "name": "Install flake8",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-08-07T14:59:51Z",
+          "completed_at": "2026-08-07T14:59:55Z"
+        },
+        {
+          "name": "Run flake8",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 5,
+          "started_at": "2026-08-07T14:59:55Z",
+          "completed_at": "2026-08-07T14:59:56Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-08-07T14:59:56Z",
+          "completed_at": "2026-08-07T14:59:56Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-08-07T14:59:56Z",
+          "completed_at": "2026-08-07T14:59:56Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-08-07T14:59:56Z",
+          "completed_at": "2026-08-07T14:59:56Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ShauryaVaid/kgiit/check-runs/92905423337",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000079,
+      "runner_name": "GitHub Actions 1000000079",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 92905423504,
+      "run_id": 31190388787,
+      "workflow_name": "CI",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/ShauryaVaid/kgiit/actions/runs/31190388787",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTv-E_s8AAAAVoZhCkA",
+      "head_sha": "cc0e4ff073dc4d1429d65cccca673d2e20c6fc86",
+      "url": "https://api.github.com/repos/ShauryaVaid/kgiit/actions/jobs/92905423504",
+      "html_url": "https://github.com/ShauryaVaid/kgiit/actions/runs/31190388787/job/92905423504",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-08-07T14:59:44Z",
+      "started_at": "2026-08-07T14:59:49Z",
+      "completed_at": "2026-08-07T15:01:21Z",
+      "name": "Test Python 3.11 on windows-latest",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-08-07T14:59:51Z",
+          "completed_at": "2026-08-07T14:59:52Z"
+        },
+        {
+          "name": "Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-08-07T14:59:52Z",
+          "completed_at": "2026-08-07T14:59:59Z"
+        },
+        {
+          "name": "Set up Python 3.11",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-08-07T14:59:59Z",
+          "completed_at": "2026-08-07T15:00:14Z"
+        },
+        {
+          "name": "Install package",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-08-07T15:00:14Z",
+          "completed_at": "2026-08-07T15:01:13Z"
+        },
+        {
+          "name": "Configure git for sandbox tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-08-07T15:01:14Z",
+          "completed_at": "2026-08-07T15:01:14Z"
+        },
+        {
+          "name": "Run full test suite",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 6,
+          "started_at": "2026-08-07T15:01:14Z",
+          "completed_at": "2026-08-07T15:01:18Z"
+        },
+        {
+          "name": "Run sandbox tests (with git available)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-08-07T15:01:18Z",
+          "completed_at": "2026-08-07T15:01:18Z"
+        },
+        {
+          "name": "Run skill contract tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-08-07T15:01:18Z",
+          "completed_at": "2026-08-07T15:01:18Z"
+        },
+        {
+          "name": "Run ML classifier tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-08-07T15:01:18Z",
+          "completed_at": "2026-08-07T15:01:18Z"
+        },
+        {
+          "name": "Verify CLI entry point works",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-08-07T15:01:18Z",
+          "completed_at": "2026-08-07T15:01:18Z"
+        },
+        {
+          "name": "Verify analyze subcommand help",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-08-07T15:01:18Z",
+          "completed_at": "2026-08-07T15:01:18Z"
+        },
+        {
+          "name": "Verify learn subcommand help",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-08-07T15:01:18Z",
+          "completed_at": "2026-08-07T15:01:18Z"
+        },
+        {
+          "name": "Headless learn smoke test",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 13,
+          "started_at": "2026-08-07T15:01:18Z",
+          "completed_at": "2026-08-07T15:01:18Z"
+        },
+        {
+          "name": "Post Set up Python 3.11",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 25,
+          "started_at": "2026-08-07T15:01:18Z",
+          "completed_at": "2026-08-07T15:01:18Z"
+        },
+        {
+          "name": "Post Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-08-07T15:01:18Z",
+          "completed_at": "2026-08-07T15:01:20Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-08-07T15:01:20Z",
+          "completed_at": "2026-08-07T15:01:20Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ShauryaVaid/kgiit/check-runs/92905423504",
+      "labels": [
+        "windows-latest"
+      ],
+      "runner_id": 1000000083,
+      "runner_name": "GitHub Actions 1000000083",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 92905423524,
+      "run_id": 31190388787,
+      "workflow_name": "CI",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/ShauryaVaid/kgiit/actions/runs/31190388787",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTv-E_s8AAAAVoZhCpA",
+      "head_sha": "cc0e4ff073dc4d1429d65cccca673d2e20c6fc86",
+      "url": "https://api.github.com/repos/ShauryaVaid/kgiit/actions/jobs/92905423524",
+      "html_url": "https://github.com/ShauryaVaid/kgiit/actions/runs/31190388787/job/92905423524",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-08-07T14:59:44Z",
+      "started_at": "2026-08-07T14:59:48Z",
+      "completed_at": "2026-08-07T15:00:39Z",
+      "name": "Test Python 3.9 on macos-latest",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-08-07T14:59:48Z",
+          "completed_at": "2026-08-07T14:59:49Z"
+        },
+        {
+          "name": "Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-08-07T14:59:49Z",
+          "completed_at": "2026-08-07T14:59:52Z"
+        },
+        {
+          "name": "Set up Python 3.9",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-08-07T14:59:52Z",
+          "completed_at": "2026-08-07T15:00:13Z"
+        },
+        {
+          "name": "Install package",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-08-07T15:00:13Z",
+          "completed_at": "2026-08-07T15:00:34Z"
+        },
+        {
+          "name": "Configure git for sandbox tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-08-07T15:00:34Z",
+          "completed_at": "2026-08-07T15:00:34Z"
+        },
+        {
+          "name": "Run full test suite",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 6,
+          "started_at": "2026-08-07T15:00:34Z",
+          "completed_at": "2026-08-07T15:00:36Z"
+        },
+        {
+          "name": "Run sandbox tests (with git available)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-08-07T15:00:36Z",
+          "completed_at": "2026-08-07T15:00:36Z"
+        },
+        {
+          "name": "Run skill contract tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-08-07T15:00:36Z",
+          "completed_at": "2026-08-07T15:00:36Z"
+        },
+        {
+          "name": "Run ML classifier tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-08-07T15:00:36Z",
+          "completed_at": "2026-08-07T15:00:36Z"
+        },
+        {
+          "name": "Verify CLI entry point works",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-08-07T15:00:36Z",
+          "completed_at": "2026-08-07T15:00:36Z"
+        },
+        {
+          "name": "Verify analyze subcommand help",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-08-07T15:00:36Z",
+          "completed_at": "2026-08-07T15:00:36Z"
+        },
+        {
+          "name": "Verify learn subcommand help",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-08-07T15:00:36Z",
+          "completed_at": "2026-08-07T15:00:36Z"
+        },
+        {
+          "name": "Headless learn smoke test",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 13,
+          "started_at": "2026-08-07T15:00:36Z",
+          "completed_at": "2026-08-07T15:00:36Z"
+        },
+        {
+          "name": "Post Set up Python 3.9",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 25,
+          "started_at": "2026-08-07T15:00:36Z",
+          "completed_at": "2026-08-07T15:00:36Z"
+        },
+        {
+          "name": "Post Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-08-07T15:00:36Z",
+          "completed_at": "2026-08-07T15:00:36Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-08-07T15:00:36Z",
+          "completed_at": "2026-08-07T15:00:37Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ShauryaVaid/kgiit/check-runs/92905423524",
+      "labels": [
+        "macos-latest"
+      ],
+      "runner_id": 1000000081,
+      "runner_name": "GitHub Actions 1000000081",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 92905423564,
+      "run_id": 31190388787,
+      "workflow_name": "CI",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/ShauryaVaid/kgiit/actions/runs/31190388787",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTv-E_s8AAAAVoZhCzA",
+      "head_sha": "cc0e4ff073dc4d1429d65cccca673d2e20c6fc86",
+      "url": "https://api.github.com/repos/ShauryaVaid/kgiit/actions/jobs/92905423564",
+      "html_url": "https://github.com/ShauryaVaid/kgiit/actions/runs/31190388787/job/92905423564",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-08-07T14:59:44Z",
+      "started_at": "2026-08-07T14:59:47Z",
+      "completed_at": "2026-08-07T15:00:19Z",
+      "name": "Test Python 3.11 on ubuntu-latest",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-08-07T14:59:47Z",
+          "completed_at": "2026-08-07T14:59:48Z"
+        },
+        {
+          "name": "Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-08-07T14:59:48Z",
+          "completed_at": "2026-08-07T14:59:50Z"
+        },
+        {
+          "name": "Set up Python 3.11",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-08-07T14:59:50Z",
+          "completed_at": "2026-08-07T14:59:52Z"
+        },
+        {
+          "name": "Install package",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-08-07T14:59:52Z",
+          "completed_at": "2026-08-07T15:00:16Z"
+        },
+        {
+          "name": "Configure git for sandbox tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-08-07T15:00:16Z",
+          "completed_at": "2026-08-07T15:00:16Z"
+        },
+        {
+          "name": "Run full test suite",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 6,
+          "started_at": "2026-08-07T15:00:16Z",
+          "completed_at": "2026-08-07T15:00:18Z"
+        },
+        {
+          "name": "Run sandbox tests (with git available)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-08-07T15:00:18Z",
+          "completed_at": "2026-08-07T15:00:18Z"
+        },
+        {
+          "name": "Run skill contract tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-08-07T15:00:18Z",
+          "completed_at": "2026-08-07T15:00:18Z"
+        },
+        {
+          "name": "Run ML classifier tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-08-07T15:00:18Z",
+          "completed_at": "2026-08-07T15:00:18Z"
+        },
+        {
+          "name": "Verify CLI entry point works",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-08-07T15:00:18Z",
+          "completed_at": "2026-08-07T15:00:18Z"
+        },
+        {
+          "name": "Verify analyze subcommand help",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-08-07T15:00:18Z",
+          "completed_at": "2026-08-07T15:00:18Z"
+        },
+        {
+          "name": "Verify learn subcommand help",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-08-07T15:00:18Z",
+          "completed_at": "2026-08-07T15:00:18Z"
+        },
+        {
+          "name": "Headless learn smoke test",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 13,
+          "started_at": "2026-08-07T15:00:18Z",
+          "completed_at": "2026-08-07T15:00:18Z"
+        },
+        {
+          "name": "Post Set up Python 3.11",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 25,
+          "started_at": "2026-08-07T15:00:18Z",
+          "completed_at": "2026-08-07T15:00:18Z"
+        },
+        {
+          "name": "Post Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-08-07T15:00:18Z",
+          "completed_at": "2026-08-07T15:00:18Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-08-07T15:00:18Z",
+          "completed_at": "2026-08-07T15:00:18Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ShauryaVaid/kgiit/check-runs/92905423564",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000080,
+      "runner_name": "GitHub Actions 1000000080",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 92905423656,
+      "run_id": 31190388787,
+      "workflow_name": "CI",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/ShauryaVaid/kgiit/actions/runs/31190388787",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTv-E_s8AAAAVoZhDKA",
+      "head_sha": "cc0e4ff073dc4d1429d65cccca673d2e20c6fc86",
+      "url": "https://api.github.com/repos/ShauryaVaid/kgiit/actions/jobs/92905423656",
+      "html_url": "https://github.com/ShauryaVaid/kgiit/actions/runs/31190388787/job/92905423656",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-08-07T14:59:44Z",
+      "started_at": "2026-08-07T14:59:47Z",
+      "completed_at": "2026-08-07T15:01:50Z",
+      "name": "Test Python 3.9 on windows-latest",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-08-07T14:59:48Z",
+          "completed_at": "2026-08-07T14:59:49Z"
+        },
+        {
+          "name": "Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-08-07T14:59:49Z",
+          "completed_at": "2026-08-07T14:59:55Z"
+        },
+        {
+          "name": "Set up Python 3.9",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-08-07T14:59:55Z",
+          "completed_at": "2026-08-07T15:00:42Z"
+        },
+        {
+          "name": "Install package",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-08-07T15:00:42Z",
+          "completed_at": "2026-08-07T15:01:44Z"
+        },
+        {
+          "name": "Configure git for sandbox tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-08-07T15:01:44Z",
+          "completed_at": "2026-08-07T15:01:44Z"
+        },
+        {
+          "name": "Run full test suite",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 6,
+          "started_at": "2026-08-07T15:01:44Z",
+          "completed_at": "2026-08-07T15:01:46Z"
+        },
+        {
+          "name": "Run sandbox tests (with git available)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-08-07T15:01:46Z",
+          "completed_at": "2026-08-07T15:01:46Z"
+        },
+        {
+          "name": "Run skill contract tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-08-07T15:01:46Z",
+          "completed_at": "2026-08-07T15:01:46Z"
+        },
+        {
+          "name": "Run ML classifier tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-08-07T15:01:46Z",
+          "completed_at": "2026-08-07T15:01:46Z"
+        },
+        {
+          "name": "Verify CLI entry point works",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-08-07T15:01:46Z",
+          "completed_at": "2026-08-07T15:01:46Z"
+        },
+        {
+          "name": "Verify analyze subcommand help",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-08-07T15:01:46Z",
+          "completed_at": "2026-08-07T15:01:46Z"
+        },
+        {
+          "name": "Verify learn subcommand help",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-08-07T15:01:46Z",
+          "completed_at": "2026-08-07T15:01:46Z"
+        },
+        {
+          "name": "Headless learn smoke test",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 13,
+          "started_at": "2026-08-07T15:01:46Z",
+          "completed_at": "2026-08-07T15:01:46Z"
+        },
+        {
+          "name": "Post Set up Python 3.9",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 25,
+          "started_at": "2026-08-07T15:01:46Z",
+          "completed_at": "2026-08-07T15:01:46Z"
+        },
+        {
+          "name": "Post Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-08-07T15:01:46Z",
+          "completed_at": "2026-08-07T15:01:49Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-08-07T15:01:49Z",
+          "completed_at": "2026-08-07T15:01:49Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ShauryaVaid/kgiit/check-runs/92905423656",
+      "labels": [
+        "windows-latest"
+      ],
+      "runner_id": 1000000082,
+      "runner_name": "GitHub Actions 1000000082",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 92905423666,
+      "run_id": 31190388787,
+      "workflow_name": "CI",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/ShauryaVaid/kgiit/actions/runs/31190388787",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTv-E_s8AAAAVoZhDMg",
+      "head_sha": "cc0e4ff073dc4d1429d65cccca673d2e20c6fc86",
+      "url": "https://api.github.com/repos/ShauryaVaid/kgiit/actions/jobs/92905423666",
+      "html_url": "https://github.com/ShauryaVaid/kgiit/actions/runs/31190388787/job/92905423666",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-08-07T14:59:44Z",
+      "started_at": "2026-08-07T14:59:48Z",
+      "completed_at": "2026-08-07T15:00:24Z",
+      "name": "Test Python 3.11 on macos-latest",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-08-07T14:59:49Z",
+          "completed_at": "2026-08-07T14:59:50Z"
+        },
+        {
+          "name": "Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-08-07T14:59:50Z",
+          "completed_at": "2026-08-07T14:59:53Z"
+        },
+        {
+          "name": "Set up Python 3.11",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-08-07T14:59:53Z",
+          "completed_at": "2026-08-07T14:59:54Z"
+        },
+        {
+          "name": "Install package",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-08-07T14:59:54Z",
+          "completed_at": "2026-08-07T15:00:18Z"
+        },
+        {
+          "name": "Configure git for sandbox tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-08-07T15:00:18Z",
+          "completed_at": "2026-08-07T15:00:18Z"
+        },
+        {
+          "name": "Run full test suite",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 6,
+          "started_at": "2026-08-07T15:00:18Z",
+          "completed_at": "2026-08-07T15:00:20Z"
+        },
+        {
+          "name": "Run sandbox tests (with git available)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-08-07T15:00:20Z",
+          "completed_at": "2026-08-07T15:00:20Z"
+        },
+        {
+          "name": "Run skill contract tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-08-07T15:00:20Z",
+          "completed_at": "2026-08-07T15:00:20Z"
+        },
+        {
+          "name": "Run ML classifier tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-08-07T15:00:20Z",
+          "completed_at": "2026-08-07T15:00:20Z"
+        },
+        {
+          "name": "Verify CLI entry point works",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-08-07T15:00:20Z",
+          "completed_at": "2026-08-07T15:00:20Z"
+        },
+        {
+          "name": "Verify analyze subcommand help",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-08-07T15:00:20Z",
+          "completed_at": "2026-08-07T15:00:20Z"
+        },
+        {
+          "name": "Verify learn subcommand help",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-08-07T15:00:20Z",
+          "completed_at": "2026-08-07T15:00:20Z"
+        },
+        {
+          "name": "Headless learn smoke test",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 13,
+          "started_at": "2026-08-07T15:00:20Z",
+          "completed_at": "2026-08-07T15:00:20Z"
+        },
+        {
+          "name": "Post Set up Python 3.11",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 25,
+          "started_at": "2026-08-07T15:00:20Z",
+          "completed_at": "2026-08-07T15:00:20Z"
+        },
+        {
+          "name": "Post Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-08-07T15:00:20Z",
+          "completed_at": "2026-08-07T15:00:21Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-08-07T15:00:21Z",
+          "completed_at": "2026-08-07T15:00:22Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ShauryaVaid/kgiit/check-runs/92905423666",
+      "labels": [
+        "macos-latest"
+      ],
+      "runner_id": 1000000084,
+      "runner_name": "GitHub Actions 1000000084",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 92905423876,
+      "run_id": 31190388787,
+      "workflow_name": "CI",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/ShauryaVaid/kgiit/actions/runs/31190388787",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTv-E_s8AAAAVoZhEBA",
+      "head_sha": "cc0e4ff073dc4d1429d65cccca673d2e20c6fc86",
+      "url": "https://api.github.com/repos/ShauryaVaid/kgiit/actions/jobs/92905423876",
+      "html_url": "https://github.com/ShauryaVaid/kgiit/actions/runs/31190388787/job/92905423876",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-08-07T14:59:44Z",
+      "started_at": "2026-08-07T14:59:49Z",
+      "completed_at": "2026-08-07T15:00:29Z",
+      "name": "Test Python 3.9 on ubuntu-latest",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-08-07T14:59:50Z",
+          "completed_at": "2026-08-07T14:59:51Z"
+        },
+        {
+          "name": "Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-08-07T14:59:51Z",
+          "completed_at": "2026-08-07T14:59:53Z"
+        },
+        {
+          "name": "Set up Python 3.9",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-08-07T14:59:53Z",
+          "completed_at": "2026-08-07T15:00:02Z"
+        },
+        {
+          "name": "Install package",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-08-07T15:00:02Z",
+          "completed_at": "2026-08-07T15:00:25Z"
+        },
+        {
+          "name": "Configure git for sandbox tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-08-07T15:00:25Z",
+          "completed_at": "2026-08-07T15:00:25Z"
+        },
+        {
+          "name": "Run full test suite",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 6,
+          "started_at": "2026-08-07T15:00:25Z",
+          "completed_at": "2026-08-07T15:00:26Z"
+        },
+        {
+          "name": "Run sandbox tests (with git available)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-08-07T15:00:26Z",
+          "completed_at": "2026-08-07T15:00:26Z"
+        },
+        {
+          "name": "Run skill contract tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-08-07T15:00:26Z",
+          "completed_at": "2026-08-07T15:00:26Z"
+        },
+        {
+          "name": "Run ML classifier tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-08-07T15:00:26Z",
+          "completed_at": "2026-08-07T15:00:26Z"
+        },
+        {
+          "name": "Verify CLI entry point works",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-08-07T15:00:26Z",
+          "completed_at": "2026-08-07T15:00:26Z"
+        },
+        {
+          "name": "Verify analyze subcommand help",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-08-07T15:00:26Z",
+          "completed_at": "2026-08-07T15:00:26Z"
+        },
+        {
+          "name": "Verify learn subcommand help",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-08-07T15:00:26Z",
+          "completed_at": "2026-08-07T15:00:26Z"
+        },
+        {
+          "name": "Headless learn smoke test",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 13,
+          "started_at": "2026-08-07T15:00:26Z",
+          "completed_at": "2026-08-07T15:00:26Z"
+        },
+        {
+          "name": "Post Set up Python 3.9",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 25,
+          "started_at": "2026-08-07T15:00:26Z",
+          "completed_at": "2026-08-07T15:00:26Z"
+        },
+        {
+          "name": "Post Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-08-07T15:00:26Z",
+          "completed_at": "2026-08-07T15:00:26Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-08-07T15:00:26Z",
+          "completed_at": "2026-08-07T15:00:26Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ShauryaVaid/kgiit/check-runs/92905423876",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000085,
+      "runner_name": "GitHub Actions 1000000085",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ]
+}

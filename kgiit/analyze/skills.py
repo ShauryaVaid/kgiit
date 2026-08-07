@@ -214,12 +214,10 @@ def build_analyze_summary(
     dup_str = f" {dup_count} possible duplicate found." if dup_count > 0 else ""
 
     if high_count > 0:
-        sentence1 = f"{high_count} HIGH severity issue{
-            's' if high_count > 1 else ''} need attention{cat_str}.{dup_str}"
+        sentence1 = f"{high_count} HIGH severity issue{'s' if high_count > 1 else ''} need attention{cat_str}.{dup_str}"
     else:
         sentence1 = f"All issues are rated MEDIUM/LOW severity{cat_str}.{dup_str}"
 
-    sentence2 = f" {unassigned_count} issue{
-        's remain' if unassigned_count != 1 else ' remains'} unassigned." if unassigned_count > 0 else " All issues are assigned."
+    sentence2 = f" {unassigned_count} issue{'s remain' if unassigned_count != 1 else ' remains'} unassigned." if unassigned_count > 0 else " All issues are assigned."
 
     return f"{sentence1}{sentence2}".strip()
