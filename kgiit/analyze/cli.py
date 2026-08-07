@@ -175,8 +175,24 @@ def analyze_cmd(
     except GitHubAuthError as e:
         print_error(f"Authentication failed (check GITHUB_TOKEN): {e}")
         sys.exit(1)
-    except GitHubRateLimitError as e:
-        print_error(f"GitHub API rate limit exceeded: {e}")
+    except GitHubRateLimitError:
+        from rich.console import Console as _Console
+        from rich.panel import Panel as _Panel
+        _con = _Console()
+        _con.print(_Panel(
+            "[bold red]GitHub API rate limit exceeded.[/bold red]\n\n"
+            "You are hitting the [bold]60 requests/hour[/bold] unauthenticated limit.\n\n"
+            "Fix: set a [bold]GITHUB_TOKEN[/bold] environment variable:\n\n"
+            "  [bold bright_cyan]Windows PowerShell:[/bold bright_cyan]\n"
+            "    [dim]$env:GITHUB_TOKEN = \"ghp_your_token_here\"[/dim]\n\n"
+            "  [bold bright_cyan]Linux / macOS:[/bold bright_cyan]\n"
+            "    [dim]export GITHUB_TOKEN=ghp_your_token_here[/dim]\n\n"
+            "Get a free token at: [link]https://github.com/settings/tokens[/link]\n"
+            "(No special scopes needed for public repos — just click Generate)\n\n"
+            "[dim]With a token: 5,000 requests/hour instead of 60.[/dim]",
+            title="[bold red]Rate Limit Exceeded[/bold red]",
+            border_style="red",
+        ))
         sys.exit(1)
     except GitHubAPIError as e:
         print_error(f"GitHub API request failed: {e}")

@@ -144,36 +144,48 @@ def _launch_tui(track: Track, headless: bool = False) -> None:
 
 def _launch_gui(track: Track) -> None:
     """Launch the FastAPI bridge and Electron GUI."""
+    import urllib.error
+    import urllib.request
+    import secrets
+
+    # ── Pre-flight: check that npx / Electron is available ──────────────────
+    npm_cmd = ["npx", "electron", "."] if sys.platform != "win32" else ["npx.cmd", "electron", "."]
+    try:
+        probe = subprocess.run(
+            [npm_cmd[0], "--version"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        if probe.returncode != 0:
+            raise FileNotFoundError
+    except FileNotFoundError:
+        console.print(
+            "\n[bold red]Electron / npx not found.[/bold red]\n\n"
+            "The GUI mode requires Node.js and Electron to be installed.\n\n"
+            "  Install Node.js from: [link]https://nodejs.org[/link]\n"
+            "  Then run:  [bold]npm install[/bold]  inside the [dim]gui/[/dim] folder.\n\n"
+            "[dim]Falling back to Terminal (TUI) mode...[/dim]\n"
+        )
+        _launch_tui(track, headless=False)
+        return
+
     console.print("[dim]Starting local backend for GUI...[/dim]")
 
-    import secrets
     auth_token = secrets.token_hex(32)
-
-    # Set track ID and auth token in env for the renderer process
     env = os.environ.copy()
     env["TRACK_ID"] = track.id
     env["KGIIT_AUTH_TOKEN"] = auth_token
 
-    import urllib.request
-    import urllib.error
-
-    # Start FastAPI server
     uvicorn_cmd = [
-        sys.executable,
-        "-m",
-        "uvicorn",
+        sys.executable, "-m", "uvicorn",
         "kgiit.learn.server:app",
-        "--port",
-        "8000",
-        "--host",
-        "127.0.0.1"]
+        "--port", "8000", "--host", "127.0.0.1",
+    ]
     server_proc = subprocess.Popen(
-        uvicorn_cmd,
-        env=env,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL)
+        uvicorn_cmd, env=env,
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    )
 
-    # Fast polling loop instead of sleeping for 1.5s
     for _ in range(50):
         try:
             urllib.request.urlopen("http://127.0.0.1:8000/docs", timeout=0.05)
@@ -182,21 +194,21 @@ def _launch_gui(track: Track) -> None:
             time.sleep(0.05)
 
     gui_dir = os.path.join(
-        os.path.dirname(
-            os.path.dirname(
-                os.path.dirname(__file__))),
-        "gui")
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "gui")
     console.print("[dim]Launching Electron GUI...[/dim]")
-    # Use npx electron directly to skip npm parsing overhead
-    npm_cmd = [
-        "npx",
-        "electron",
-        "."] if sys.platform != "win32" else [
-        "npx.cmd",
-        "electron",
-        "."]
 
-    electron_proc = subprocess.Popen(npm_cmd, cwd=gui_dir, env=env)
+    try:
+        electron_proc = subprocess.Popen(npm_cmd, cwd=gui_dir, env=env)
+    except FileNotFoundError:
+        console.print(
+            "\n[bold red]Could not launch Electron.[/bold red]\n"
+            "Make sure Node.js is installed and run [bold]npm install[/bold] "
+            "in the [dim]gui/[/dim] folder first.\n\n"
+            "[dim]Falling back to Terminal (TUI) mode...[/dim]\n"
+        )
+        server_proc.terminate()
+        _launch_tui(track, headless=False)
+        return
 
     try:
         electron_proc.wait()
@@ -214,6 +226,7 @@ def launch_learn_interactive() -> None:
     1. Track selection
     2. Mode selection (terminal / GUI)
     3. Launch TUI or GUI
+    4. After completion, offer to continue to next track or quit.
     """
     console.print(
         Panel(
@@ -238,12 +251,42 @@ def launch_learn_interactive() -> None:
     )
 
     mode = _select_mode()
-
     console.print(f"\n[dim]Launching {mode} mode...[/dim]")
+
     if mode == "gui":
         _launch_gui(track)
     else:
         _launch_tui(track, headless=False)
+
+    # ── After a track finishes: offer next track ─────────────────────────────
+    current_idx = next(
+        (i for i, t in enumerate(ALL_TRACKS) if t.id == track.id), None)
+    if current_idx is not None and current_idx + 1 < len(ALL_TRACKS):
+        next_track = ALL_TRACKS[current_idx + 1]
+        console.print(
+            f"\n[bold bright_green]Track complete![/bold bright_green] "
+            f"Next up: [bold]{next_track.title}[/bold] "
+            f"([dim]{len(next_track.lessons)} lessons[/dim])\n"
+        )
+        try:
+            go_next = console.input(
+                "[bold bright_cyan]Continue to next track? (y/n, default=y): "
+                "[/bold bright_cyan]"
+            ).strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            go_next = "n"
+
+        if go_next in ("", "y", "yes"):
+            console.print(f"\n[dim]Starting {next_track.title}...[/dim]")
+            if mode == "gui":
+                _launch_gui(next_track)
+            else:
+                _launch_tui(next_track, headless=False)
+    else:
+        console.print(
+            "\n[bold bright_magenta]You've completed all available tracks![/bold bright_magenta]\n"
+            "Try [bold]kgiit analyze --repo <owner/repo>[/bold] to triage a real GitHub repository.\n"
+        )
 
 
 @click.group(

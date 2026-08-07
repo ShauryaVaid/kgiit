@@ -11,6 +11,16 @@ import os
 import subprocess
 import sys
 
+# Force UTF-8 output on Windows so Rich box/unicode characters
+# never crash the cp1252 codec (happens on older Windows terminals)
+if sys.platform == "win32" and sys.stdout.encoding.lower() != "utf-8":
+    os.environ.setdefault("PYTHONUTF8", "1")
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 import click
 from rich import box
 from rich.console import Console
@@ -26,12 +36,7 @@ console = Console()
 
 def _print_kgiit_banner() -> None:
     """Print the main kgiit welcome banner matching the premium aesthetic."""
-    # Force UTF-8 for Windows so block characters don't crash cp1252
-    if sys.stdout.encoding.lower() != 'utf-8' and hasattr(sys.stdout, 'reconfigure'):
-        try:
-            sys.stdout.reconfigure(encoding='utf-8')
-        except Exception:
-            pass
+    # UTF-8 reconfigure is handled at module import level (top of this file)
 
     # The exact block chunks for KGiit to allow vertical column coloring
     chunks = [
@@ -68,17 +73,25 @@ def _print_kgiit_banner() -> None:
     console.print()
 
     # 4) Modes / Doors (Cleanly listed under the banner)
-    modes = Text(justify="center")
-    modes.append(
-        "[bold #ff007f]Door 1 →[/bold #ff007f] [bold white]KGiit analyze[/bold white] — Apply git/GitHub skills on real repos\n")
-    modes.append(
-        "[dim #a0a5b5]Needs internet + optional GITHUB_TOKEN[/dim #a0a5b5]\n\n")
-    modes.append(
-        "[bold #00f2fe]Door 2 →[/bold #00f2fe] [bold white]KGiit learn[/bold white]   — Practice git commands in a safe sandbox\n")
-    modes.append(
-        "[dim #a0a5b5]Fully offline. No LLM. No external API.[/dim #a0a5b5]\n")
-
-    console.print(modes)
+    console.print(
+        "[bold #ff007f]Door 1 \u2192[/bold #ff007f] [bold white]KGiit analyze[/bold white]"
+        " — Apply git/GitHub skills on real repos",
+        justify="center"
+    )
+    console.print(
+        "[dim #a0a5b5]Needs internet + optional GITHUB_TOKEN[/dim #a0a5b5]",
+        justify="center"
+    )
+    console.print()
+    console.print(
+        "[bold #00f2fe]Door 2 \u2192[/bold #00f2fe] [bold white]KGiit learn[/bold white]"
+        "   — Practice git commands in a safe sandbox",
+        justify="center"
+    )
+    console.print(
+        "[dim #a0a5b5]Fully offline. No LLM. No external API.[/dim #a0a5b5]",
+        justify="center"
+    )
     console.print()
 
 

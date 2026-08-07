@@ -278,25 +278,54 @@ class LearnApp(App):
             "[bold]tracks[/bold] | [bold]reset[/bold] | [bold]quit[/bold][/dim]\n")
 
     def _show_completion(self) -> None:
-        """Show track completion message."""
+        """Show track completion message and prepare to exit so caller can offer next track."""
+        from kgiit.learn.curriculum import ALL_TRACKS
         log = self.query_one("#scrollback", RichLog)
         log.clear()
+
+        # Find if there is a next track
+        current_idx = next(
+            (i for i, t in enumerate(ALL_TRACKS) if t.id == self.track.id), None)
+        has_next = current_idx is not None and current_idx + 1 < len(ALL_TRACKS)
+        next_track = ALL_TRACKS[current_idx + 1] if has_next else None
+
         log.write(
             "\n[bold #a371f7]=========================================[/bold #a371f7]\n"
             "[bold #a371f7]   TRACK COMPLETION CERTIFICATE   [/bold #a371f7]\n"
             "[bold #a371f7]=========================================[/bold #a371f7]\n\n"
             f"[white]Track:    [bold]{self.track.title}[/bold][/white]\n"
-            f"[white]Lessons:  {len(self.lessons)} / {len(self.lessons)}[/white]\n"
+            f"[white]Lessons:  [bold bright_cyan]{len(self.lessons)} / {len(self.lessons)}[/bold bright_cyan][/white]\n"
             f"[white]Status:   [bold #a371f7]PASSED[/bold #a371f7][/white]\n\n"
             "[bold bright_magenta]Ready to try this on a real repository?[/bold bright_magenta]\n"
-            "[white]Run: [bold yellow]kgiit analyze --repo <owner/name>[/bold yellow][/white]\n\n"
-            "[dim]Press Ctrl+Q to exit, or type 'quit'.[/dim]"
+            "[white]Run: [bold yellow]kgiit analyze --repo <owner/name>[/bold yellow][/white]\n"
         )
+        if has_next:
+            log.write(
+                f"\n[bold bright_green]Next up:[/bold bright_green] "
+                f"[bold]{next_track.title}[/bold] "
+                f"([dim]{len(next_track.lessons)} lessons[/dim])\n"
+                "[dim]Press Ctrl+Q to exit — you will be asked about the next track.[/dim]"
+            )
+        else:
+            log.write(
+                "\n[bold bright_magenta]You've completed ALL tracks! Amazing work.[/bold bright_magenta]\n"
+                "[dim]Press Ctrl+Q to exit.[/dim]"
+            )
+
         status = self.query_one("#status-pane", StatusPane)
-        status.update(
-            "[bold #a371f7]Track Complete![/bold #a371f7]\n\n"
-            "[white]All lessons done.[/white]"
-        )
+        if has_next:
+            status.update(
+                "[bold #a371f7]Track Complete![/bold #a371f7]\n\n"
+                "[white]All lessons done.[/white]\n\n"
+                f"[bold bright_green]Next:[/bold bright_green]\n"
+                f"[bold]{next_track.title}[/bold]"
+            )
+        else:
+            status.update(
+                "[bold #a371f7]Track Complete![/bold #a371f7]\n\n"
+                "[white]All lessons done.[/white]\n\n"
+                "[bold bright_magenta]All tracks\ncomplete![/bold bright_magenta]"
+            )
 
     def _refresh_status(self) -> None:
         """Refresh the status pane from current sandbox state."""
@@ -425,11 +454,16 @@ class LearnApp(App):
         self.exit()
 
     def action_next_lesson(self) -> None:
-        """Advance to the next lesson."""
+        """Advance to the next lesson, or show completion if on last lesson."""
         log = self.query_one("#scrollback", RichLog)
         next_idx = self.current_lesson_idx + 1
         if next_idx >= len(self.lessons):
-            self._show_completion()
+            # Already finished — re-show the completion screen if not already there
+            if next_idx == len(self.lessons):
+                self._show_completion()
+            # If already on completion screen, Ctrl+N exits so caller can offer next track
+            else:
+                self.exit()
         else:
             log.write(f"\n[dim]Moving to lesson {next_idx + 1}...[/dim]")
             self._start_lesson(next_idx)
