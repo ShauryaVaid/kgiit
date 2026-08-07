@@ -258,8 +258,7 @@ class LearnApp(App):
         lesson_num = idx + 1
         total = len(self.lessons)
         log.write(
-            f"[bold bright_magenta]━━━ Lesson {lesson_num}/{total}: {
-                lesson.title} ━━━[/bold bright_magenta]\n")
+            f"[bold bright_magenta]━━━ Lesson {lesson_num}/{total}: {lesson.title} ━━━[/bold bright_magenta]\n")
         log.write(
             f"[bold bright_yellow]Concept:[/bold bright_yellow] "
             f"[white]{lesson.concept}[/white]\n"
@@ -404,8 +403,7 @@ class LearnApp(App):
                 expected=lesson.target_command,
                 context=context,
             )
-            conf_str = f"(ML: {ml_label}, {
-                confidence:.0%})" if confidence > 0 else f"(Rule: {ml_label})"
+            conf_str = f"(ML: {ml_label}, {confidence:.0%})" if confidence > 0 else f"(Rule: {ml_label})"
             log.write(
                 f"\n[bold yellow]✗ Not quite... {conf_str}[/bold yellow]")
             log.write("\n[bold yellow]Hint:[/bold yellow]")
@@ -463,5 +461,4 @@ class LearnApp(App):
         for line in lesson.hint.split("\n"):
             log.write(f"[yellow]{line}[/yellow]")
         log.write(
-            f"\n[dim]Target command: [bold]{
-                lesson.target_command}[/bold][/dim]")
+            f"\n[dim]Target command: [bold]{lesson.target_command}[/bold][/dim]")

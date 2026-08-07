@@ -253,8 +253,7 @@ def get_git_log(repo_path: str, skip: int = 0):
     except subprocess.CalledProcessError as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Git log failed: {
-                e.stderr}")
+            detail=f"Git log failed: {e.stderr}")
 
     commits = []
     # Parse the null-byte delimited output
