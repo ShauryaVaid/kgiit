@@ -27,7 +27,8 @@ def format_labels(labels: list[str]) -> str:
     chips = []
     for idx, label in enumerate(labels):
         color = LABEL_COLORS[idx % len(LABEL_COLORS)]
-        chips.append(f"[bold black on {color}] {label} [/bold black on {color}]")
+        chips.append(
+            f"[bold black on {color}] {label} [/bold black on {color}]")
 
     return " ".join(chips)
 
@@ -68,7 +69,8 @@ def print_banner(repo: str, console: Console | None = None) -> Panel:
     return panel
 
 
-def print_issues_table(issues: list[dict[str, Any]], console: Console | None = None) -> Table:
+def print_issues_table(
+        issues: list[dict[str, Any]], console: Console | None = None) -> Table:
     """
     Render and print a rich Table listing issues with columns:
     #, Title (truncated), Labels (as colored chips), Comments, URL.
@@ -86,7 +88,11 @@ def print_issues_table(issues: list[dict[str, Any]], console: Console | None = N
     table.add_column("#", style="bold cyan", justify="right", width=6)
     table.add_column("Title", style="bold white", min_width=25, max_width=45)
     table.add_column("Labels", style="none", min_width=15)
-    table.add_column("Comments", style="bold magenta", justify="center", width=10)
+    table.add_column(
+        "Comments",
+        style="bold magenta",
+        justify="center",
+        width=10)
     table.add_column("URL", style="underline blue", no_wrap=True)
 
     for issue in issues:
@@ -102,7 +108,12 @@ def print_issues_table(issues: list[dict[str, Any]], console: Console | None = N
     return table
 
 
-def print_priority_table(ranked_issues: list[dict[str, Any]], classifications: dict[str, dict[str, Any]], console: Console | None = None) -> Table:
+def print_priority_table(ranked_issues: list[dict[str,
+                                                  Any]],
+                         classifications: dict[str,
+                                               dict[str,
+                                                    Any]],
+                         console: Console | None = None) -> Table:
     """
     Render agent skill priority ranking & severity classification table.
     """
@@ -140,13 +151,21 @@ def print_priority_table(ranked_issues: list[dict[str, Any]], classifications: d
         owner_str = info.get("owner", "unassigned")
         reason_str = item.get("reason", "")
 
-        table.add_row(rank_str, num_str, sev_styled, label_str, owner_str, reason_str)
+        table.add_row(
+            rank_str,
+            num_str,
+            sev_styled,
+            label_str,
+            owner_str,
+            reason_str)
 
     console.print(table)
     return table
 
 
-def print_summary_panel(summary_text: str, console: Console | None = None) -> Panel:
+def print_summary_panel(
+        summary_text: str,
+        console: Console | None = None) -> Panel:
     """Print an agent skill summary panel."""
     if console is None:
         console = Console()

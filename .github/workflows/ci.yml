@@ -50,8 +50,8 @@ jobs:
       - name: Verify CLI entry point works
         run: kgiit --help
 
-      - name: Verify triage subcommand help
-        run: kgiit triage --help
+      - name: Verify analyze subcommand help
+        run: kgiit analyze --help
 
       - name: Verify learn subcommand help
         run: kgiit learn --help

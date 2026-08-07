@@ -45,7 +45,9 @@ def write_report(
     else:
         for issue in issues:
             num = f"#{issue.get('number', '')}"
-            title = issue.get("title", "").replace("|", "\\|")  # Escape pipes in markdown table
+            title = issue.get(
+                "title", "").replace(
+                "|", "\\|")  # Escape pipes in markdown table
 
             raw_labels = issue.get("labels", [])
             if raw_labels:
@@ -82,7 +84,7 @@ def write_report(
 
             raw_labels = issue.get("labels", [])
             if raw_labels:
-                labels_formatted = ", ".join(f"`{l}`" for l in raw_labels)
+                labels_formatted = ", ".join(f"`{lbl}`" for lbl in raw_labels)
                 lines.append(f"- **Labels**: {labels_formatted}")
 
             lines.append("")

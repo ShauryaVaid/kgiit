@@ -5,6 +5,11 @@ let sessionId = null;
 let currentLessonIndex = 0;
 let totalLessons = 1;
 let trackId = window.api ? window.api.getTrackId() : 'git-basics';
+const authToken = window.api ? window.api.getAuthToken() : '';
+
+if (authToken) {
+  axios.defaults.headers.common['X-Auth-Token'] = authToken;
+}
 
 const elements = {
   trackTitle: document.getElementById('track-title'),
@@ -25,7 +30,21 @@ const elements = {
   trackModal: document.getElementById('track-modal'),
   trackList: document.getElementById('track-list'),
   btnCloseModal: document.getElementById('btn-close-modal'),
+  btnGitLog: document.getElementById('btn-git-log'),
+  gitLogModal: document.getElementById('git-log-modal'),
+  btnSelectRepo: document.getElementById('btn-select-repo'),
+  gitLogPath: document.getElementById('git-log-path'),
+  gitLogLoading: document.getElementById('git-log-loading'),
+  gitLogError: document.getElementById('git-log-error'),
+  gitLogEmpty: document.getElementById('git-log-empty'),
+  gitLogTable: document.getElementById('git-log-table'),
+  gitLogTbody: document.getElementById('git-log-tbody'),
+  btnLoadMore: document.getElementById('btn-load-more'),
+  btnCloseLogModal: document.getElementById('btn-close-log-modal'),
 };
+
+let currentLogRepo = '';
+let currentLogSkip = 0;
 
 function appendToScrollback(html) {
   const div = document.createElement('div');
@@ -242,6 +261,96 @@ if (elements.btnCloseModal) {
   elements.btnCloseModal.addEventListener('click', () => {
     elements.trackModal.style.display = 'none';
   });
+}
+
+// Git Log Logic
+if (elements.btnGitLog) {
+  elements.btnGitLog.addEventListener('click', () => {
+    elements.gitLogModal.style.display = 'flex';
+  });
+}
+
+if (elements.btnCloseLogModal) {
+  elements.btnCloseLogModal.addEventListener('click', () => {
+    elements.gitLogModal.style.display = 'none';
+  });
+}
+
+if (elements.btnSelectRepo) {
+  elements.btnSelectRepo.addEventListener('click', async () => {
+    const dir = await window.api.selectDirectory();
+    if (dir) {
+      currentLogRepo = dir;
+      currentLogSkip = 0;
+      elements.gitLogTbody.innerHTML = '';
+      fetchGitLog();
+    }
+  });
+}
+
+if (elements.btnLoadMore) {
+  elements.btnLoadMore.addEventListener('click', () => {
+    currentLogSkip += 500;
+    fetchGitLog(true);
+  });
+}
+
+async function fetchGitLog(append = false) {
+  if (!currentLogRepo) return;
+  
+  elements.gitLogPath.textContent = `Viewing: ${currentLogRepo}`;
+  elements.gitLogLoading.style.display = 'block';
+  elements.gitLogError.style.display = 'none';
+  if (!append) {
+    elements.gitLogTable.style.display = 'none';
+    elements.gitLogEmpty.style.display = 'none';
+  }
+  elements.btnLoadMore.style.display = 'none';
+
+  try {
+    const res = await axios.get(`${API_BASE}/git/log`, {
+      params: { repo_path: currentLogRepo, skip: currentLogSkip }
+    });
+    
+    elements.gitLogLoading.style.display = 'none';
+    const commits = res.data.commits;
+
+    if (!append && commits.length === 0) {
+      elements.gitLogEmpty.style.display = 'block';
+      return;
+    }
+
+    elements.gitLogTable.style.display = 'table';
+    
+    commits.forEach(c => {
+      const tr = document.createElement('tr');
+      tr.style.borderBottom = '1px solid #30363d';
+      
+      let refHtml = '';
+      if (c.refs) {
+        refHtml = `<span style="background: #1f6feb; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.8em; margin-right: 5px;">${c.refs}</span>`;
+      }
+
+      tr.innerHTML = `
+        <td style="padding: 8px; color: #8b949e; font-family: monospace;">${c.hash.substring(0, 7)}</td>
+        <td style="padding: 8px;">${refHtml}</td>
+        <td style="padding: 8px;">${c.message}</td>
+        <td style="padding: 8px; color: #8b949e;">${c.author}</td>
+        <td style="padding: 8px; color: #8b949e;">${new Date(c.date).toLocaleString()}</td>
+      `;
+      elements.gitLogTbody.appendChild(tr);
+    });
+
+    if (commits.length === 500) {
+      elements.btnLoadMore.style.display = 'block';
+    }
+
+  } catch (err) {
+    elements.gitLogLoading.style.display = 'none';
+    elements.gitLogError.style.display = 'block';
+    const detail = err.response?.data?.detail || err.message;
+    elements.gitLogError.textContent = `Error: ${detail}`;
+  }
 }
 
 // Init

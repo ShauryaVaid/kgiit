@@ -21,6 +21,10 @@ ENV/
 # Triage outputs & reports (ignore markdown files except README)
 *.md
 !README.md
+!ARCHITECTURE.md
+!CONTRIBUTING.md
+!VERIFICATION.md
+!CHANGELOG.md
 !.agents/**/*.md
 
 # IDE & OS files

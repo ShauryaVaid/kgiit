@@ -19,6 +19,18 @@ training is NEVER required. This script is only needed if you want to
 retrain after extending the dataset or adding new lessons.
 """
 
+from kgiit.learn.ml.data_gen import (
+    DATASET_PATH,
+    generate_dataset,
+    save_dataset,
+)
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.compose import ColumnTransformer
 import sys
 import time
 from pathlib import Path
@@ -26,24 +38,12 @@ from pathlib import Path
 # Add project root to path if running as script
 sys.path.insert(0, str(Path(__file__).parents[4]))
 
-from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-from sklearn.model_selection import train_test_split
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
 
 try:
     import joblib
 except ImportError:
     from sklearn.externals import joblib
 
-from kgiit.learn.ml.data_gen import (
-    DATASET_PATH,
-    generate_dataset,
-    save_dataset,
-)
 
 MODEL_PATH = Path(__file__).parent / "model.joblib"
 CONFIDENCE_THRESHOLD = 0.45  # Below this: fall back to rule-based hints
@@ -124,8 +124,13 @@ def prepare_X_y(rows):
     df = pd.DataFrame(rows)
 
     # Cast numeric columns
-    for col in ["edit_distance", "flag_delta", "arg_delta",
-                "context_has_staged", "context_has_unstaged", "context_is_init"]:
+    for col in [
+        "edit_distance",
+        "flag_delta",
+        "arg_delta",
+        "context_has_staged",
+        "context_has_unstaged",
+            "context_is_init"]:
         df[col] = df[col].astype(float)
 
     X = df[["command", "edit_distance", "flag_delta", "arg_delta",
@@ -160,19 +165,25 @@ def train_and_evaluate():
     y_pred = pipeline.predict(X_test)
     acc = accuracy_score(y_test, y_pred)
 
-    print(f"\n{'='*60}")
-    print(f"  Held-out Accuracy: {acc:.4f} ({acc*100:.1f}%)")
-    print(f"{'='*60}\n")
+    print(f"\n{'=' * 60}")
+    print(f"  Held-out Accuracy: {acc:.4f} ({acc * 100:.1f}%)")
+    print(f"{'=' * 60}\n")
     print("Classification Report:")
-    print(classification_report(y_test, y_pred, labels=labels, zero_division=0))
+    print(
+        classification_report(
+            y_test,
+            y_pred,
+            labels=labels,
+            zero_division=0))
 
     print("Confusion Matrix (rows=actual, cols=predicted):")
     cm = confusion_matrix(y_test, y_pred, labels=labels)
     # Pretty print
-    header = " " * 22 + "  ".join(f"{l[:6]:6s}" for l in labels)
+    header = " " * 22 + "  ".join(f"{lbl[:6]:6s}" for lbl in labels)
     print(header)
     for i, label in enumerate(labels):
-        row_str = f"{label:22s}  " + "  ".join(f"{cm[i,j]:6d}" for j in range(len(labels)))
+        row_str = f"{label:22s}  " + \
+            "  ".join(f"{cm[i, j]:6d}" for j in range(len(labels)))
         print(row_str)
 
     # 5. Timing
@@ -185,7 +196,8 @@ def train_and_evaluate():
     for _ in range(100):
         pipeline.predict_proba(sample)
     t_inf_avg = (time.time() - t_inf) / 100 * 1000 / 10  # ms per sample
-    print(f"[+] Inference speed: ~{t_inf_avg:.1f}ms per prediction (target: <50ms)")
+    print(
+        f"[+] Inference speed: ~{t_inf_avg:.1f}ms per prediction (target: <50ms)")
 
     return pipeline, acc
 

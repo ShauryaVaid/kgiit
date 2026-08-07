@@ -50,6 +50,7 @@ class SandboxEscapeError(Exception):
 
 class SandboxCommandError(Exception):
     """Raised when a git command fails inside the sandbox."""
+
     def __init__(self, message: str, returncode: int = -1, stderr: str = ""):
         super().__init__(message)
         self.returncode = returncode
@@ -188,7 +189,9 @@ class SandboxSession:
 
         return result
 
-    def run_user_command(self, command_str: str) -> subprocess.CompletedProcess:
+    def run_user_command(
+            self,
+            command_str: str) -> subprocess.CompletedProcess:
         """
         Execute a user-typed command string inside the sandbox repo_dir.
 
@@ -306,7 +309,10 @@ class SandboxSession:
 
         seeder = seeders.get(fixture)
         if seeder is None:
-            raise ValueError(f"Unknown fixture '{fixture}'. Valid options: {list(seeders.keys())}")
+            raise ValueError(
+                f"Unknown fixture '{fixture}'. Valid options: {
+                    list(
+                        seeders.keys())}")
 
         seeder()
 
@@ -322,7 +328,9 @@ class SandboxSession:
         """Repo with one initial commit on main."""
         self.run(["git", "init"], cwd=self.repo_dir, check=True)
         readme = self.repo_dir / "README.md"
-        readme.write_text("# kgiit sandbox\n\nPractice repository.\n", encoding="utf-8")
+        readme.write_text(
+            "# kgiit sandbox\n\nPractice repository.\n",
+            encoding="utf-8")
         self.run(["git", "add", "README.md"], cwd=self.repo_dir, check=True)
         self.run(
             ["git", "commit", "-m", "Initial commit: add README"],
@@ -375,8 +383,9 @@ class SandboxSession:
         """Create a bare repository acting as a remote and an empty sandbox."""
         remote_dir = self.root / "remote.git"
         remote_dir.mkdir(parents=True, exist_ok=True)
-        self.run(["git", "init", "--bare", "--initial-branch=main"], cwd=remote_dir, check=True)
-        
+        self.run(["git", "init", "--bare", "--initial-branch=main"],
+                 cwd=remote_dir, check=True)
+
         # User will start in an empty repo_dir to clone the remote
         self.repo_dir.mkdir(parents=True, exist_ok=True)
 

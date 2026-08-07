@@ -19,8 +19,25 @@ def classify_issue(issue: dict[str, Any]) -> dict[str, Any]:
     combined_text = f"{title} {body}".lower()
 
     # 1. Severity Classification (per SKILL.md: HIGH > MEDIUM > LOW)
-    high_keywords = ["crash", "security", "vulnerability", "data loss", "auth", "payment", "login", "broken core", "fatal"]
-    medium_keywords = ["slow", "timeout", "lag", "performance", "partial", "error", "fail", "bug"]
+    high_keywords = [
+        "crash",
+        "security",
+        "vulnerability",
+        "data loss",
+        "auth",
+        "payment",
+        "login",
+        "broken core",
+        "fatal"]
+    medium_keywords = [
+        "slow",
+        "timeout",
+        "lag",
+        "performance",
+        "partial",
+        "error",
+        "fail",
+        "bug"]
 
     if any(kw in combined_text for kw in high_keywords):
         severity = "HIGH"
@@ -62,7 +79,8 @@ def classify_issue(issue: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def detect_duplicates(target_issue: dict[str, Any], existing_issues: list[dict[str, Any]]) -> dict[str, Any]:
+def detect_duplicates(
+        target_issue: dict[str, Any], existing_issues: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Compare target issue against existing issues according to .agents/skills/duplicate-detector/SKILL.md.
 
@@ -117,7 +135,8 @@ def detect_duplicates(target_issue: dict[str, Any], existing_issues: list[dict[s
         }
 
 
-def rank_priorities(classified_issues: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def rank_priorities(
+        classified_issues: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """
     Rank a list of classified issues according to .agents/skills/priority-ranker/SKILL.md rules.
 
@@ -135,7 +154,8 @@ def rank_priorities(classified_issues: list[dict[str, Any]]) -> list[dict[str, A
     def sort_key(item):
         sev_rank = severity_order.get(item.get("severity", "LOW"), 2)
 
-        # Check core flow impact (per spec: auth, payments, checkout, core features)
+        # Check core flow impact (per spec: auth, payments, checkout, core
+        # features)
         label = item.get("label", "").lower()
         core_flow = 0 if "auth" in label or "payment" in label else 1
 
@@ -163,7 +183,8 @@ def rank_priorities(classified_issues: list[dict[str, Any]]) -> list[dict[str, A
     return ranked_output
 
 
-def build_analyze_summary(classified_issues: list[dict[str, Any]], duplicates: list[dict[str, Any]] | None = None) -> str:
+def build_analyze_summary(
+        classified_issues: list[dict[str, Any]], duplicates: list[dict[str, Any]] | None = None) -> str:
     """
     Generate a concise plain-text summary paragraph according to .agents/skills/analyze-summary/SKILL.md.
 
@@ -174,25 +195,31 @@ def build_analyze_summary(classified_issues: list[dict[str, Any]], duplicates: l
     if not classified_issues:
         return "No open issues evaluated for analyze."
 
-    high_count = sum(1 for item in classified_issues if item.get("severity") == "HIGH")
-    unassigned_count = sum(1 for item in classified_issues if item.get("owner") == "unassigned")
+    high_count = sum(
+        1 for item in classified_issues if item.get("severity") == "HIGH")
+    unassigned_count = sum(
+        1 for item in classified_issues if item.get("owner") == "unassigned")
 
     # Identify predominant category (per spec: most frequent label)
-    categories = [item.get("label") for item in classified_issues if item.get("label") and item.get("label") != "uncategorized"]
+    categories = [item.get("label") for item in classified_issues if item.get(
+        "label") and item.get("label") != "uncategorized"]
     if categories:
         most_common_cat = max(set(categories), key=categories.count)
         cat_str = f", mostly in {most_common_cat}"
     else:
         cat_str = ""
 
-    dup_count = sum(1 for item in (duplicates or []) if item.get("is_duplicate"))
+    dup_count = sum(1 for item in (duplicates or [])
+                    if item.get("is_duplicate"))
     dup_str = f" {dup_count} possible duplicate found." if dup_count > 0 else ""
 
     if high_count > 0:
-        sentence1 = f"{high_count} HIGH severity issue{'s' if high_count > 1 else ''} need attention{cat_str}.{dup_str}"
+        sentence1 = f"{high_count} HIGH severity issue{
+            's' if high_count > 1 else ''} need attention{cat_str}.{dup_str}"
     else:
         sentence1 = f"All issues are rated MEDIUM/LOW severity{cat_str}.{dup_str}"
 
-    sentence2 = f" {unassigned_count} issue{'s remain' if unassigned_count != 1 else ' remains'} unassigned." if unassigned_count > 0 else " All issues are assigned."
+    sentence2 = f" {unassigned_count} issue{
+        's remain' if unassigned_count != 1 else ' remains'} unassigned." if unassigned_count > 0 else " All issues are assigned."
 
     return f"{sentence1}{sentence2}".strip()

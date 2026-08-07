@@ -6,13 +6,14 @@ Usage:
     kgiit analyze [OPTIONS]  Analyze real GitHub issues (needs internet + optional GITHUB_TOKEN)
     kgiit learn  [OPTIONS]  Practice git commands in a safe offline sandbox
 """
+from rich.table import Table
 import os
 import subprocess
 import sys
 
 import click
 from rich import box
-from rich.console import Console, Group
+from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 
@@ -22,10 +23,6 @@ from kgiit.learn.cli import learn_cmd
 
 console = Console()
 
-
-from rich.align import Align
-from rich.rule import Rule
-from rich.table import Table
 
 def _print_kgiit_banner() -> None:
     """Print the main kgiit welcome banner matching the premium aesthetic."""
@@ -48,13 +45,13 @@ def _print_kgiit_banner() -> None:
     colors = ["#00f2fe", "#4facfe", "#b15eff", "#ff007f", "#ff4b91"]
 
     banner = Text(justify="center")
-    
+
     # 1) Colorful Gradient ASCII Art
     for row in chunks:
         for i, chunk in enumerate(row):
             banner.append(chunk, style=f"bold {colors[i]}")
         banner.append("\n")
-    
+
     # 2) Subtitles
     banner.append("\nTwo doors. One CLI.\n", style="bold #fdfbfb")
     banner.append("github.com/ShauryaVaid/kgiit", style="dim #a0a5b5")
@@ -69,14 +66,18 @@ def _print_kgiit_banner() -> None:
     )
     console.print(logo_panel)
     console.print()
-    
+
     # 4) Modes / Doors (Cleanly listed under the banner)
     modes = Text(justify="center")
-    modes.append("[bold #ff007f]Door 1 →[/bold #ff007f] [bold white]KGiit analyze[/bold white] — Apply git/GitHub skills on real repos\n")
-    modes.append("[dim #a0a5b5]Needs internet + optional GITHUB_TOKEN[/dim #a0a5b5]\n\n")
-    modes.append("[bold #00f2fe]Door 2 →[/bold #00f2fe] [bold white]KGiit learn[/bold white]   — Practice git commands in a safe sandbox\n")
-    modes.append("[dim #a0a5b5]Fully offline. No LLM. No external API.[/dim #a0a5b5]\n")
-    
+    modes.append(
+        "[bold #ff007f]Door 1 →[/bold #ff007f] [bold white]KGiit analyze[/bold white] — Apply git/GitHub skills on real repos\n")
+    modes.append(
+        "[dim #a0a5b5]Needs internet + optional GITHUB_TOKEN[/dim #a0a5b5]\n\n")
+    modes.append(
+        "[bold #00f2fe]Door 2 →[/bold #00f2fe] [bold white]KGiit learn[/bold white]   — Practice git commands in a safe sandbox\n")
+    modes.append(
+        "[dim #a0a5b5]Fully offline. No LLM. No external API.[/dim #a0a5b5]\n")
+
     console.print(modes)
     console.print()
 
@@ -86,35 +87,48 @@ def _interactive_menu() -> None:
     while True:
         os.system("cls" if os.name == "nt" else "clear")
         _print_kgiit_banner()
-        
+
         console.print("  [bold white]Choose a mode:[/bold white]\n")
-        
+
         # Menu Options Table (No Box)
         menu_table = Table.grid(padding=(0, 2))
         menu_table.add_column(justify="right")
         menu_table.add_column(justify="left", style="white")
-        menu_table.add_row("  [bold #ff007f][1][/bold #ff007f]", "Apply git/GitHub skills — analyze real issues in a repository")
-        menu_table.add_row("", "[dim #a0a5b5](needs internet, optional GITHUB_TOKEN)[/dim #a0a5b5]\n")
-        menu_table.add_row("  [bold #00f2fe][2][/bold #00f2fe]", "Learn git — practice commands in a safe offline sandbox")
-        menu_table.add_row("", "[dim #a0a5b5](fully offline, no LLM, no external API)[/dim #a0a5b5]\n")
-        menu_table.add_row("  [bold #b15eff][3][/bold #b15eff]", "Run Automated Demo — hands-free walkthrough of the CLI\n")
-        menu_table.add_row("  [bold #6c757d]\\[/bye, q][/bold #6c757d]", "[dim]Quit[/dim]\n")
+        menu_table.add_row(
+            "  [bold #ff007f][1][/bold #ff007f]",
+            "Apply git/GitHub skills — analyze real issues in a repository")
+        menu_table.add_row(
+            "", "[dim #a0a5b5](needs internet, optional GITHUB_TOKEN)[/dim #a0a5b5]\n")
+        menu_table.add_row(
+            "  [bold #00f2fe][2][/bold #00f2fe]",
+            "Learn git — practice commands in a safe offline sandbox")
+        menu_table.add_row(
+            "", "[dim #a0a5b5](fully offline, no LLM, no external API)[/dim #a0a5b5]\n")
+        menu_table.add_row(
+            "  [bold #b15eff][3][/bold #b15eff]",
+            "Run Automated Demo — hands-free walkthrough of the CLI\n")
+        menu_table.add_row(
+            "  [bold #6c757d]\\[/bye, q][/bold #6c757d]",
+            "[dim]Quit[/dim]\n")
 
         console.print(menu_table)
 
         try:
-            choice = console.input("[bold #ff69b4]Enter choice (1/2/3/q): [/bold #ff69b4]").strip().lower()
+            choice = console.input(
+                "[bold #ff69b4]Enter choice (1/2/3/q): [/bold #ff69b4]").strip().lower()
         except (EOFError, KeyboardInterrupt):
             console.print("\n[dim]Exiting.[/dim]")
             sys.exit(0)
 
         if choice == "1":
             console.print()
-            repo = console.input("[bold #ff69b4]Enter GitHub repo (e.g. KGiit-project/KGiit): [/bold #ff69b4]").strip()
+            repo = console.input(
+                "[bold #ff69b4]Enter GitHub repo (e.g. KGiit-project/KGiit): [/bold #ff69b4]").strip()
             if repo:
                 console.print(f"\n[dim]Running analyze for {repo}...[/dim]\n")
                 cmd = ["kgiit"] if sys.platform != "win32" else ["kgiit.exe"]
-                subprocess.run(cmd + ["analyze", "--repo", repo, "--all-open"], check=False)
+                subprocess.run(
+                    cmd + ["analyze", "--repo", repo, "--all-open"], check=False)
             else:
                 console.print("[red]No repository entered.[/red]")
                 import time
@@ -129,14 +143,17 @@ def _interactive_menu() -> None:
             cmd = ["kgiit"] if sys.platform != "win32" else ["kgiit.exe"]
             subprocess.run(cmd + ["learn", "demo"], check=False)
         elif choice in ("q", "quit", "exit", "/bye", ""):
-            console.print("\n[bold bright_magenta]Goodbye![/bold bright_magenta]")
+            console.print(
+                "\n[bold bright_magenta]Goodbye![/bold bright_magenta]")
             sys.exit(0)
         else:
-            console.print(f"\n[bold red]Invalid choice:[/] '{choice}'. Please enter 1, 2, 3, or /bye.")
+            console.print(
+                f"\n[bold red]Invalid choice:[/] '{choice}'. Please enter 1, 2, 3, or /bye.")
             import time
             time.sleep(1)
-        
-        # After command runs, pause to let user see output if they want, then loop
+
+        # After command runs, pause to let user see output if they want, then
+        # loop
         console.print("\n[dim]Press Enter to return to the main menu...[/dim]")
         try:
             input()

@@ -52,11 +52,10 @@ except ImportError:
     ),
 )
 @click.version_option(version="1.0.0", prog_name="kgiit analyze")
-@click.option(
-    "--repo",
-    required=True,
-    help="Target GitHub repository in owner/name format (e.g. octocat/Hello-World).",
-)
+@click.option("--repo",
+              required=True,
+              help="Target GitHub repository in owner/name format (e.g. octocat/Hello-World).",
+              )
 @click.option(
     "--issue",
     type=int,
@@ -99,7 +98,8 @@ def analyze_cmd(
     """Main CLI entrypoint for kgiit analyze."""
     # 1. Validate options
     if issue is not None and all_open:
-        print_error("Cannot pass both --issue and --all-open. Please select only one.")
+        print_error(
+            "Cannot pass both --issue and --all-open. Please select only one.")
         sys.exit(1)
 
     if issue is None and not all_open:
@@ -107,8 +107,10 @@ def analyze_cmd(
         sys.exit(1)
 
     # 2. Validate repo format
-    if "/" not in repo or repo.count("/") != 1 or not repo.split("/")[0] or not repo.split("/")[1]:
-        print_error(f"Invalid repository format '{repo}'. Expected format 'owner/name'.")
+    if "/" not in repo or repo.count("/") != 1 or not repo.split("/")[
+            0] or not repo.split("/")[1]:
+        print_error(
+            f"Invalid repository format '{repo}'. Expected format 'owner/name'.")
         sys.exit(1)
 
     owner, repo_name = repo.split("/")
@@ -122,21 +124,25 @@ def analyze_cmd(
         issues = []
 
         if issue is not None:
-            click.echo(f"[*] Fetching issue #{issue} for {owner}/{repo_name}...")
+            click.echo(
+                f"[*] Fetching issue #{issue} for {owner}/{repo_name}...")
             single_issue = client.get_issue(owner, repo_name, issue)
             issues = [single_issue]
         else:
-            click.echo(f"[*] Fetching all open issues for {owner}/{repo_name}...")
+            click.echo(
+                f"[*] Fetching all open issues for {owner}/{repo_name}...")
             issues = client.list_open_issues(owner, repo_name)
 
         if not issues:
-            click.echo(f"[+] No matching issues found for {owner}/{repo_name}.")
+            click.echo(
+                f"[+] No matching issues found for {owner}/{repo_name}.")
         else:
             print_issues_table(issues)
 
             # 5. Agent Skill Layer Integration
             if agent_skills:
-                click.echo("[*] Executing Agent Skill Layer (issue-analyze, priority-ranker, duplicate-detector)...")
+                click.echo(
+                    "[*] Executing Agent Skill Layer (issue-analyze, priority-ranker, duplicate-detector)...")
                 classifications = {}
                 classified_list = []
                 duplicates = []
@@ -153,12 +159,15 @@ def analyze_cmd(
                 ranked_list = rank_priorities(classified_list)
                 print_priority_table(ranked_list, classifications)
 
-                summary_text = build_analyze_summary(classified_list, duplicates)
+                summary_text = build_analyze_summary(
+                    classified_list, duplicates)
                 print_summary_panel(summary_text)
 
             if not no_report:
-                report_path = write_report(owner, repo_name, issues, output_path=output)
-                click.echo(f"[+] Report generated successfully at: {report_path}")
+                report_path = write_report(
+                    owner, repo_name, issues, output_path=output)
+                click.echo(
+                    f"[+] Report generated successfully at: {report_path}")
 
     except GitHubNotFoundError as e:
         print_error(f"Repository or issue not found: {e}")

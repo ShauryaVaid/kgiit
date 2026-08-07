@@ -143,7 +143,8 @@ def _edit_distance(a: str, b: str) -> int:
     for i, ca in enumerate(a):
         curr = [i + 1]
         for j, cb in enumerate(b):
-            curr.append(min(prev[j + 1] + 1, curr[j] + 1, prev[j] + (ca != cb)))
+            curr.append(
+                min(prev[j + 1] + 1, curr[j] + 1, prev[j] + (ca != cb)))
         prev = curr
     return prev[len(b)]
 
@@ -188,7 +189,8 @@ def _rule_based_classify(typed: str, expected: str) -> str:
     return "PARTIALLY_CORRECT"
 
 
-def _build_feature_row(typed: str, expected: str, context: dict[str, Any]) -> dict[str, Any]:
+def _build_feature_row(typed: str, expected: str,
+                       context: dict[str, Any]) -> dict[str, Any]:
     """Build a single feature row for model inference."""
     ed = _edit_distance(typed, expected)
     flag_d = _count_flags(typed) - _count_flags(expected)
@@ -238,7 +240,8 @@ class MistakeClassifier:
             self._model_available = True
             logger.info(f"Loaded ML classifier from {MODEL_PATH}")
         except Exception as e:
-            logger.warning(f"Failed to load model: {e}. Using rule-based fallback.")
+            logger.warning(
+                f"Failed to load model: {e}. Using rule-based fallback.")
             self._model_available = False
 
     def predict(
@@ -292,7 +295,8 @@ class MistakeClassifier:
                         f"Falling back to rules. (ML predicted: {ml_label})"
                     )
             except Exception as e:
-                logger.warning(f"ML inference error: {e}. Using rule-based fallback.")
+                logger.warning(
+                    f"ML inference error: {e}. Using rule-based fallback.")
 
         # Fall back to rule-based
         if label is None:

@@ -1,9 +1,10 @@
 <div align="center">
   
-# KGiit (v1.0.0)
+# KGiit (v1.1.0)
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/release/python-3100/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/ShauryaVaid/kgiit/actions/workflows/python-app.yml/badge.svg)](https://github.com/ShauryaVaid/kgiit/actions/workflows/python-app.yml)
 
 <br/>
 
@@ -16,6 +17,9 @@
  ╚═╝  ╚═╝ ╚═════╝ ╚═╝╚═╝   ╚═╝   
 ```
 **Two Doors. One CLI.**
+
+<br/>
+<img src="assets/images/main-menu.png" alt="Main CLI Menu" width="80%">
 
 </div>
 
@@ -30,6 +34,24 @@ Built with a high-performance Python backend and an integrated dynamic Terminal 
 - **Analyze Mode (`kgiit analyze`)**: An internet-connected triage engine that interfaces directly with the GitHub API. It pulls live repository issues and utilizes Natural Language Processing (NLP) to categorize, prioritize, and diagnose real-world software defects.
 - **Learn Mode (`kgiit learn`)**: A 100% offline, isolated sandbox environment. It allows students to practice destructive Git commands safely without the risk of affecting production environments or modifying the host operating system's global Git configuration.
 
+> [!WARNING]
+> **Deployment & Security Model:** KGiit is strictly a **local, single-user developer tool**. 
+> The integrated FastAPI server binds exclusively to `127.0.0.1`. It is highly scalable in terms of user distribution (millions of users can run it locally), but it is NOT a hosted multi-tenant cloud service. To protect against CSRF attacks from malicious browser tabs, the server enforces a randomized, per-session `X-Auth-Token`.
+
+---
+
+## Universal Git History Viewer
+
+Added in **v1.1.0**, KGiit features a rich, interactive Git History Viewer integrated directly into the Electron GUI.
+
+<div align="center">
+  <img src="assets/images/gui-git-log.png" alt="Universal Git History Viewer" width="80%">
+</div>
+
+* **Universal Folder Picker:** You are not restricted to the sandbox. Using native OS dialogs, you can select any local repository on your system to view its history.
+* **Structured & Scalable:** The backend parses raw git output into structured JSON, capable of rendering branching graphs and traversing histories spanning thousands of commits.
+* **Hardened Security:** The local endpoint enforces strict path canonicalization, `.git` presence validation, and a 10-second subprocess timeout. It utilizes data-capping (`--max-count=500`) to guarantee extreme performance (sub-100ms response times and <5MB memory footprint) even on massive repositories like the Linux Kernel.
+
 ---
 
 ## Machine Learning Integration
@@ -39,14 +61,26 @@ KGiit differentiates itself from standard terminal utilities through its integra
 ### Typo Correction & Command Classification
 In the offline learning sandbox, students often make syntactical errors when attempting complex Git commands. KGiit intercepts these failures and passes the erroneous input through a localized classification model. The model calculates string distance heuristics and semantic intent to predict the user's intended Git command, providing immediate, context-aware pedagogical hints rather than standard terminal error codes.
 
+<div align="center">
+  <img src="assets/images/learn-gui-hints.png" alt="GUI Sandbox with ML Hints" width="80%">
+</div>
+
 ### NLP Issue Triage Engine
 When executing `kgiit analyze`, the system retrieves raw issue data from GitHub. The embedded NLP classifier analyzes the unstructured text of issue titles and bodies, extracting semantic meaning to automatically assign severity rankings (HIGH, MEDIUM, LOW) and categorical labels (bug, docs, enhancement). This drastically reduces the manual overhead required for repository maintainers to triage incoming tickets.
+
+<div align="center">
+  <img src="assets/images/analyze-output.png" alt="Analyze NLP Triage Engine" width="80%">
+</div>
 
 ---
 
 ## Interactive Curriculum
 
 The KGiit Learn Engine includes a comprehensive, interactive curriculum designed to take users from absolute beginners to collaborative engineers. The curriculum is divided into three primary tracks:
+
+<div align="center">
+  <img src="assets/images/learn-menu.png" alt="Learn Mode Curriculum" width="80%">
+</div>
 
 ### 1. Git Basics
 Focuses on the foundational operations required for local version control.
@@ -146,6 +180,15 @@ From the main menu, you can select the desired mode using your keyboard arrows.
 - The **Learn Mode** operates entirely offline and requires no additional configuration.
 
 To exit the application interface at any time, type `/bye` or `q`.
+
+If you prefer learning inside the terminal without the GUI, you can run the headless TUI mode:
+```bash
+kgiit learn --headless
+```
+
+<div align="center">
+  <img src="assets/images/learn-tui.png" alt="Headless TUI Learn Mode" width="80%">
+</div>
 
 ---
 
