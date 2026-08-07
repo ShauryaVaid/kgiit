@@ -147,7 +147,7 @@ flowchart LR
 ### Prerequisites
 - Python 3.10 or higher
 - Git installed and available in the system PATH
-- Node.js (Optional, only required if modifying the Electron GUI)
+- Node.js (Required if you intend to use the KGiit Electron GUI)
 
 ### Installation Instructions
 
@@ -163,7 +163,15 @@ flowchart LR
    pip install -e .
    ```
 
-3. **Verify Installation:**
+3. **Install GUI Dependencies (Optional but recommended):**
+   If you plan to use the graphical interface, you must install the Electron dependencies.
+   ```bash
+   cd gui
+   npm install
+   cd ..
+   ```
+
+4. **Verify Installation:**
    ```bash
    kgiit --help
    ```
