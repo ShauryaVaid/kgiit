@@ -309,10 +309,7 @@ class SandboxSession:
 
         seeder = seeders.get(fixture)
         if seeder is None:
-            raise ValueError(
-                f"Unknown fixture '{fixture}'. Valid options: {
-                    list(
-                        seeders.keys())}")
+            raise ValueError(f"Unknown fixture '{fixture}'. Valid options: {list(seeders.keys())}")
 
         seeder()
 

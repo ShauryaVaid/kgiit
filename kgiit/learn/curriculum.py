@@ -99,9 +99,7 @@ def _verify_init(
     if result.returncode != 0:
         return VerifyResult(
             passed=False,
-            message=f"Command exited with error code {
-                result.returncode}. {
-                result.stderr.strip()}",
+            message=f"Command exited with error code {result.returncode}. {result.stderr.strip()}",
         )
     if not _git_dir_exists(sandbox):
         return VerifyResult(
@@ -152,9 +150,7 @@ def _verify_status(
     """Verify git status ran and showed something meaningful."""
     if result.returncode != 0:
         return VerifyResult(
-            passed=False, message=f"git status failed (exit {
-                result.returncode}): {
-                result.stderr.strip()}", )
+            passed=False, message=f"git status failed (exit {result.returncode}): {result.stderr.strip()}", )
     output = result.stdout.lower()
     if "nothing to commit" in output or "on branch" in output or "no commits yet" in output:
         return VerifyResult(
@@ -208,9 +204,7 @@ def _verify_add(
     """Verify that hello.txt was staged."""
     if result.returncode != 0:
         return VerifyResult(
-            passed=False, message=f"git add failed (exit {
-                result.returncode}): {
-                result.stderr.strip()}", )
+            passed=False, message=f"git add failed (exit {result.returncode}): {result.stderr.strip()}", )
     staged = _get_staged_files(sandbox)
     if not staged:
         return VerifyResult(
@@ -279,9 +273,7 @@ def _verify_commit(
     """Verify a commit was actually created."""
     if result.returncode != 0:
         return VerifyResult(
-            passed=False, message=f"git commit failed (exit {
-                result.returncode}): {
-                result.stderr.strip()}", )
+            passed=False, message=f"git commit failed (exit {result.returncode}): {result.stderr.strip()}", )
     msg = _get_last_commit_message(sandbox)
     if msg is None:
         return VerifyResult(
@@ -342,9 +334,7 @@ def _verify_branch(
     """Verify that the 'feature' branch was created and we switched to it."""
     if result.returncode != 0:
         return VerifyResult(
-            passed=False, message=f"Command failed (exit {
-                result.returncode}): {
-                result.stderr.strip()}", )
+            passed=False, message=f"Command failed (exit {result.returncode}): {result.stderr.strip()}", )
     # Check current branch
     current = _get_current_branch(sandbox)
     branch_exists = _branch_exists(sandbox, "feature")
@@ -504,8 +494,7 @@ def _verify_clone(
         result: subprocess.CompletedProcess) -> VerifyResult:
     if result.returncode != 0:
         return VerifyResult(
-            False, f"git clone failed: {
-                result.stderr.strip()}")
+            False, f"git clone failed: {result.stderr.strip()}")
     if not _git_dir_exists(sandbox):
         return VerifyResult(
             False,
