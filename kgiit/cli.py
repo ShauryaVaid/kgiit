@@ -68,17 +68,25 @@ def _print_kgiit_banner() -> None:
     console.print()
 
     # 4) Modes / Doors (Cleanly listed under the banner)
-    modes = Text(justify="center")
-    modes.append(
-        "[bold #ff007f]Door 1 →[/bold #ff007f] [bold white]KGiit analyze[/bold white] — Apply git/GitHub skills on real repos\n")
-    modes.append(
-        "[dim #a0a5b5]Needs internet + optional GITHUB_TOKEN[/dim #a0a5b5]\n\n")
-    modes.append(
-        "[bold #00f2fe]Door 2 →[/bold #00f2fe] [bold white]KGiit learn[/bold white]   — Practice git commands in a safe sandbox\n")
-    modes.append(
-        "[dim #a0a5b5]Fully offline. No LLM. No external API.[/dim #a0a5b5]\n")
-
-    console.print(modes)
+    console.print(
+        "[bold #ff007f]Door 1 \u2192[/bold #ff007f] [bold white]KGiit analyze[/bold white]"
+        " — Apply git/GitHub skills on real repos",
+        justify="center"
+    )
+    console.print(
+        "[dim #a0a5b5]Needs internet + optional GITHUB_TOKEN[/dim #a0a5b5]",
+        justify="center"
+    )
+    console.print()
+    console.print(
+        "[bold #00f2fe]Door 2 \u2192[/bold #00f2fe] [bold white]KGiit learn[/bold white]"
+        "   — Practice git commands in a safe sandbox",
+        justify="center"
+    )
+    console.print(
+        "[dim #a0a5b5]Fully offline. No LLM. No external API.[/dim #a0a5b5]",
+        justify="center"
+    )
     console.print()
 
 
