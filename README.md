@@ -22,145 +22,123 @@
 
 ---
 
-## Overview
+## 1. What is this project about?
 
-**KGiit** is an advanced, dual-engine Command Line Interface designed for modern software engineering education and repository management. It serves as both a completely offline educational sandbox for mastering Git workflows and an active, network-connected diagnostic engine for analyzing live GitHub repositories.
+**KGiit** is a powerful, dual-engine CLI and GUI hybrid designed for modern software engineering education and repository management. It solves a critical problem in tech education: bridging the gap between learning Git in a sterile environment and actually contributing to massive, real-world open-source projects. 
 
-Built with a high-performance Python backend and an integrated dynamic Terminal User Interface (TUI), KGiit seamlessly bridges the gap between learning theoretical version control concepts and executing them in real-world scenarios.
+It achieves this through a **"Two Doors" architecture**:
+*   **Door 1 (Analyze Mode):** An internet-connected, NLP-powered triage engine that interfaces directly with the GitHub API to categorize and rank real-world software defects.
+*   **Door 2 (Learn Mode):** A 100% offline, isolated sandbox environment that allows students to practice destructive Git commands safely with real-time feedback.
 
-- **Analyze Mode (`kgiit analyze`)**: An internet-connected triage engine that interfaces directly with the GitHub API. It pulls live repository issues and utilizes Natural Language Processing (NLP) to categorize, prioritize, and diagnose real-world software defects.
-- **Learn Mode (`kgiit learn`)**: A 100% offline, isolated sandbox environment. It allows students to practice destructive Git commands safely without the risk of affecting production environments or modifying the host operating system's global Git configuration.
+<div align="center">
+  <img src="assets/images/main-menu.png" alt="Main CLI Menu" width="80%">
+</div>
+
+---
+
+## 2. What skills and features does it hold?
+
+### Interactive Offline Curriculum
+A fully integrated Electron GUI (and a headless TUI mode) that guides users through progressive modules: **Git Basics**, **Branching & Merging**, and **Remotes & Collaboration**.
+
+<div align="center">
+  <img src="assets/images/learn-menu.png" alt="Learn Mode Curriculum" width="80%">
+</div>
+
+### Machine Learning Integration
+*   **Intent Classification:** When a user types a wrong command (e.g., `git comit`), a localized ML classifier uses string distance and semantic heuristics to predict what they meant and offers pedagogical hints.
+*   **NLP Issue Triage:** Automatically analyzes unstructured text in GitHub issues to assign categorical labels (bug, docs) and severity rankings (HIGH, MEDIUM, LOW) so contributors know exactly where to start.
+
+<div align="center">
+  <img src="assets/images/learn-gui-hints.png" alt="GUI Sandbox with ML Hints" width="80%">
+</div>
+
+### Universal Git History Viewer (New in v1.1.0)
+A rich graphical interface that lets users open *any* repository on their laptop (using a universal folder picker) to view its commit history, branching graph, and metadata in a structured, paginated table.
+
+<div align="center">
+  <img src="assets/images/gui-git-log.png" alt="Universal Git History Viewer" width="80%">
+</div>
+
+### Real-time State Tracking
+The GUI actively monitors the sandbox and displays live counts of staged, unstaged, and untracked files alongside your current branch, without the user needing to constantly type `git status`.
+
+---
+
+## 3. How is it beneficial for you as a student?
+
+*   **Risk-Free Playground:** Version control is intimidating. KGiit’s sandbox allows you to execute dangerous commands (`git reset --hard`, `git push --force`) without the fear of destroying a real project or messing up your global system configuration.
+*   **Pedagogical Feedback, not Errors:** Standard terminals give cryptic error codes. KGiit intercepts mistakes and provides human-readable hints to teach you *why* a command failed.
+*   **Direct Pipeline to Open Source (GSoC):** Once you master the basics in the sandbox, you can immediately switch to `kgiit analyze --repo <target-repo>`. The ML engine will surface the easiest, lowest-severity issues in massive repositories, giving you a direct entry point into contributing to Google Summer of Code (GSoC) projects.
+
+<div align="center">
+  <img src="assets/images/analyze-output.png" alt="Analyze NLP Triage Engine" width="80%">
+</div>
+
+---
+
+## 4. How is it optimized for local system performance?
+
+*   **Micro-Architecture:** The system runs a high-performance Python (FastAPI) backend alongside a lightweight Electron GUI. 
+*   **Data-Capping & Pagination:** The Universal Git History viewer restricts subprocess data retrieval (e.g., `--max-count=500`). This guarantees sub-100ms response times and an ultra-low memory footprint (<5MB), allowing it to render the history of massive codebases like the Linux Kernel instantaneously without crashing.
+*   **Ephemeral Storage:** The sandbox utilizes native OS temporary directories (`tempfile.mkdtemp`). Once a lesson is finished or the app is closed, the sandbox is instantly purged, leaving zero bloat on your hard drive.
+
+---
+
+## 5. How is it protected (Security Architecture)?
+
+KGiit implements enterprise-grade, defense-in-depth security to ensure that running a local server on your machine doesn't expose you to vulnerabilities:
 
 > [!WARNING]
-> **Deployment & Security Model:** KGiit is strictly a **local, single-user developer tool**. 
-> The integrated FastAPI server binds exclusively to `127.0.0.1`. It is highly scalable in terms of user distribution (millions of users can run it locally), but it is NOT a hosted multi-tenant cloud service. To protect against CSRF attacks from malicious browser tabs, the server enforces a randomized, per-session `X-Auth-Token`.
+> **Deployment Model:** KGiit is strictly a **local, single-user developer tool**. It is highly scalable in terms of user distribution (millions of users can run it locally), but it is NOT a hosted multi-tenant cloud service. 
+
+*   **Anti-CSRF Session Tokens:** The FastAPI backend binds exclusively to `127.0.0.1`. To prevent malicious websites in your browser from executing Git commands on your machine via Cross-Site Request Forgery (CSRF), KGiit generates a cryptographically secure, randomized 32-byte token (`secrets.token_hex(32)`) upon boot.
+*   **Invisible Transmission:** This token is passed securely to the Electron GUI via environment variables (`subprocess.Popen(env=...)`), ensuring it is completely invisible to system monitoring tools like Task Manager or `ps`.
+*   **Timing Attack Mitigation:** The API validates this token using `hmac.compare_digest()`, completely eliminating theoretical timing-attack vectors.
+*   **Strict Canonicalization:** The Git history viewer enforces strict path resolution and `.git` directory validation, entirely neutralizing directory traversal (path injection) attacks.
 
 ---
 
-## Universal Git History Viewer
+## 6. How to use it (Example Commands)
 
-Added in **v1.1.0**, KGiit features a rich, interactive Git History Viewer integrated directly into the Electron GUI.
-
-* **Universal Folder Picker:** You are not restricted to the sandbox. Using native OS dialogs, you can select any local repository on your system to view its history.
-* **Structured & Scalable:** The backend parses raw git output into structured JSON, capable of rendering branching graphs and traversing histories spanning thousands of commits.
-* **Hardened Security:** The local endpoint enforces strict path canonicalization, `.git` presence validation, and a 10-second subprocess timeout. It utilizes data-capping (`--max-count=500`) to guarantee extreme performance (sub-100ms response times and <5MB memory footprint) even on massive repositories like the Linux Kernel.
-
----
-
-## Machine Learning Integration
-
-KGiit differentiates itself from standard terminal utilities through its integration of custom-trained, locally executing Machine Learning models.
-
-### Typo Correction & Command Classification
-In the offline learning sandbox, students often make syntactical errors when attempting complex Git commands. KGiit intercepts these failures and passes the erroneous input through a localized classification model. The model calculates string distance heuristics and semantic intent to predict the user's intended Git command, providing immediate, context-aware pedagogical hints rather than standard terminal error codes.
-
-### NLP Issue Triage Engine
-When executing `kgiit analyze`, the system retrieves raw issue data from GitHub. The embedded NLP classifier analyzes the unstructured text of issue titles and bodies, extracting semantic meaning to automatically assign severity rankings (HIGH, MEDIUM, LOW) and categorical labels (bug, docs, enhancement). This drastically reduces the manual overhead required for repository maintainers to triage incoming tickets.
-
----
-
-## Interactive Curriculum
-
-The KGiit Learn Engine includes a comprehensive, interactive curriculum designed to take users from absolute beginners to collaborative engineers. The curriculum is divided into three primary tracks:
-
-### 1. Git Basics
-Focuses on the foundational operations required for local version control.
-- **Lesson 1: Initialize a Repository** (`git init`)
-- **Lesson 2: Check Repository Status** (`git status`)
-- **Lesson 3: Stage a File** (`git add`)
-- **Lesson 4: Make a Commit** (`git commit`)
-
-### 2. Branching & Merging
-Introduces parallel development concepts and non-linear history management.
-- **Lesson 1: Create & Switch Branches** (`git branch`, `git switch`)
-- **Lesson 2: Merge Branches & Resolve Conflicts** (`git merge`) - *Includes a pre-seeded, interactive merge conflict resolution scenario.*
-
-### 3. Remotes & Collaboration
-Simulates a secure, offline network environment to teach collaborative workflows without requiring an internet connection.
-- **Lesson 1: Clone a Repository** (`git clone`)
-- **Lesson 2: Push Changes** (`git push`)
-- **Lesson 3: Pull Changes** (`git pull`)
-
----
-
-## System Architecture
-
-### Project Structure
-
-```mermaid
-graph TD
-    A[KGiit Repository]
-    
-    A --> B(kgiit/ Core Python Package)
-    A --> C(gui/ Electron Interface)
-    A --> D(tests/ Validation Suite)
-    A --> E(Documentation)
-    
-    B --> B1[cli.py: Main Entrypoint]
-    B --> B2[analyze/: Triage Engine]
-    B --> B3[learn/: Offline Sandbox]
-    B --> B4[skills/: ML Skills]
-    
-    C --> C1[main.js: Bootstrapper]
-    C --> C2[styles.css: Styling Tokens]
-```
-
-### Execution Workflow
-
-```mermaid
-flowchart LR
-    User([Developer / Student]) --> CLI[KGiit CLI]
-    CLI -->|kgiit analyze| A[Analyze Engine]
-    CLI -->|kgiit learn| L[Learn Engine]
-    
-    A -->|Fetches Issues| API[(GitHub API)]
-    A -->|Categorizes| NLP[ML NLP Classifier]
-    
-    L -->|Hosts| S[FastAPI Server]
-    S -->|Renders| G[Electron GUI]
-    L -->|Executes in| Sandbox[Offline Git Sandbox]
-```
-
----
-
-## Setup and Installation
-
-### Prerequisites
-- Python 3.10 or higher
-- Git installed and available in the system PATH
-- Node.js (Optional, only required if modifying the Electron GUI)
-
-### Installation Instructions
-
-1. **Clone the repository:**
+### Setup and Installation
+1. Clone the repository and navigate to it:
    ```bash
    git clone https://github.com/ShauryaVaid/kgiit.git
    cd kgiit
    ```
-
-2. **Install the Python package:**
-   It is highly recommended to install the package in editable mode so that the `kgiit` binary is automatically linked to your system PATH.
+2. Install the Python package in editable mode (requires Python 3.10+):
    ```bash
    pip install -e .
    ```
 
-3. **Verify Installation:**
-   ```bash
-   kgiit --help
-   ```
-
 ### Usage
 
-To launch the primary KGiit interface, execute:
+**Interactive Mode (The easiest way to start):**
 ```bash
 kgiit
 ```
+*(This launches an interactive, rich terminal menu where you can navigate with your arrow keys.)*
 
-From the main menu, you can select the desired mode using your keyboard arrows. 
-- For the **Analyze Mode**, exporting the `GITHUB_TOKEN` environment variable is recommended to bypass standard API rate limits.
-- The **Learn Mode** operates entirely offline and requires no additional configuration.
+**Directly Launch the Offline Sandbox GUI:**
+```bash
+kgiit learn
+```
+*(This boots the FastAPI backend and Electron GUI, starting you on Lesson 1 of the Git Basics track.)*
 
-To exit the application interface at any time, type `/bye` or `q`.
+If you are on an SSH connection or prefer the terminal, you can use the headless Textual TUI:
+```bash
+kgiit learn --headless
+```
+<div align="center">
+  <img src="assets/images/learn-tui.png" alt="Headless TUI Learn Mode" width="80%">
+</div>
+
+**Analyze a Real GitHub Repository (e.g., VS Code):**
+```bash
+kgiit analyze --repo microsoft/vscode --all-open
+```
+*(This will fetch the latest issues from the VS Code repository, run them through the NLP triage engine, and output a prioritized, formatted table directly in your terminal.)*
 
 ---
 
