@@ -136,9 +136,13 @@ def _launch_gui(track: Track) -> None:
     """Launch the FastAPI bridge and Electron GUI."""
     console.print("[dim]Starting local backend for GUI...[/dim]")
     
-    # Set track ID in env for the renderer process
+    import secrets
+    auth_token = secrets.token_hex(32)
+
+    # Set track ID and auth token in env for the renderer process
     env = os.environ.copy()
     env["TRACK_ID"] = track.id
+    env["KGIIT_AUTH_TOKEN"] = auth_token
 
     import urllib.request
     import urllib.error

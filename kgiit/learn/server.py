@@ -3,16 +3,35 @@ kgiit.learn.server — FastAPI bridge for the Electron GUI.
 """
 from __future__ import annotations
 
+import os
 import subprocess
+from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, Header
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from kgiit.learn.curriculum import get_track, ALL_TRACKS
 from kgiit.learn.ml.classifier import classify_mistake
 from kgiit.learn.sandbox import SandboxSession, SandboxCommandError
 
-app = FastAPI(title="kgiit GUI Bridge")
+# Ensure the auth token exists if running under CLI bridge
+EXPECTED_TOKEN = os.environ.get("KGIIT_AUTH_TOKEN")
+
+def verify_token(x_auth_token: str = Header(None)):
+    if EXPECTED_TOKEN and x_auth_token != EXPECTED_TOKEN:
+        raise HTTPException(status_code=403, detail="Invalid or missing X-Auth-Token")
+    return x_auth_token
+
+app = FastAPI(title="kgiit GUI Bridge", dependencies=[Depends(verify_token)] if EXPECTED_TOKEN else [])
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Since it's a local Electron app, we allow file:// etc, but the Auth Token is the actual protection
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # In-memory session store for the bridge
 # mapping: session_id -> SandboxSession
@@ -168,3 +187,60 @@ def stop_session(session_id: str):
         _sessions[session_id].purge()
         del _sessions[session_id]
     return {"status": "ok"}
+
+@app.get("/api/git/log")
+def get_git_log(repo_path: str, skip: int = 0):
+    """
+    Fetch the git log for the given repository path.
+    Enforces strict path canonicalization, .git directory validation, and subprocess hardening.
+    """
+    canonical_path = os.path.realpath(repo_path)
+    
+    # Path validation: must contain a .git directory or file
+    git_dir = os.path.join(canonical_path, ".git")
+    if not os.path.exists(git_dir):
+        raise HTTPException(status_code=400, detail="Provided path is not a valid git repository (missing .git)")
+
+    # Hardened subprocess call
+    cmd = [
+        "git",
+        "log",
+        "--all",
+        "--format=%H%x00%P%x00%an%x00%aI%x00%d%x00%s",
+        "--max-count=500",
+        f"--skip={skip}"
+    ]
+    
+    try:
+        proc = subprocess.run(
+            cmd,
+            cwd=canonical_path,
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=10
+        )
+    except FileNotFoundError:
+        raise HTTPException(status_code=500, detail="git executable not found on PATH.")
+    except subprocess.TimeoutExpired:
+        raise HTTPException(status_code=504, detail="Git log operation timed out (10s limit).")
+    except subprocess.CalledProcessError as e:
+        raise HTTPException(status_code=500, detail=f"Git log failed: {e.stderr}")
+
+    commits = []
+    # Parse the null-byte delimited output
+    for line in proc.stdout.strip("\n").split("\n"):
+        if not line:
+            continue
+        parts = line.split("\x00")
+        if len(parts) >= 6:
+            commits.append({
+                "hash": parts[0],
+                "parents": parts[1].split() if parts[1] else [],
+                "author": parts[2],
+                "date": parts[3],
+                "refs": parts[4].strip(" ()"),
+                "message": parts[5]
+            })
+            
+    return {"commits": commits, "repo": canonical_path}

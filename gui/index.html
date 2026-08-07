@@ -56,6 +56,7 @@
         <button id="btn-skip">Skip Lesson ⏭</button>
         <button id="btn-reset">Reset Lesson</button>
         <button id="btn-quit" style="margin-top:10px; background-color: var(--border-color); color: var(--text-color);">Switch Track (Quit)</button>
+        <button id="btn-git-log" style="margin-top:10px; background-color: var(--border-color); color: var(--text-color);">View Git History</button>
       </div>
     </div>
   </div>
@@ -66,6 +67,39 @@
       <h2>Select a Track</h2>
       <div id="track-list"></div>
       <button id="btn-close-modal" style="margin-top:15px; width:100%; background-color: var(--border-color); color: var(--text-color);">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Git Log Modal -->
+  <div id="git-log-modal" class="modal">
+    <div class="modal-content" style="max-width: 800px; width: 90%; max-height: 80vh; display: flex; flex-direction: column;">
+      <h2>Git History Viewer</h2>
+      <div style="margin-bottom: 10px; display: flex; gap: 10px;">
+        <button id="btn-select-repo" style="flex: 1;">Select Repository Folder</button>
+      </div>
+      <div id="git-log-path" style="font-size: 0.85em; color: var(--text-color); margin-bottom: 15px; word-break: break-all;"></div>
+      
+      <div id="git-log-content" style="flex: 1; overflow-y: auto; background-color: #0d1117; border: 1px solid var(--border-color); border-radius: 4px; padding: 10px; margin-bottom: 15px;">
+        <div id="git-log-loading" style="display: none; text-align: center; padding: 20px;">Loading commits...</div>
+        <div id="git-log-error" style="display: none; color: #ff7b72; padding: 20px;"></div>
+        <div id="git-log-empty" style="display: none; text-align: center; padding: 20px; color: #8b949e;">No commits found in this repository.</div>
+        <table id="git-log-table" style="width: 100%; border-collapse: collapse; font-size: 0.9em; display: none;">
+          <thead style="border-bottom: 1px solid var(--border-color); text-align: left;">
+            <tr>
+              <th style="padding: 8px;">Hash</th>
+              <th style="padding: 8px;">Refs</th>
+              <th style="padding: 8px;">Message</th>
+              <th style="padding: 8px;">Author</th>
+              <th style="padding: 8px;">Date</th>
+            </tr>
+          </thead>
+          <tbody id="git-log-tbody"></tbody>
+        </table>
+      </div>
+      <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <button id="btn-load-more" style="display: none; flex: 1;">Load More</button>
+      </div>
+      <button id="btn-close-log-modal" style="width:100%; background-color: var(--border-color); color: var(--text-color);">Close Viewer</button>
     </div>
   </div>
 
