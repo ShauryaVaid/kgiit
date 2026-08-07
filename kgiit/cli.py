@@ -11,6 +11,16 @@ import os
 import subprocess
 import sys
 
+# Force UTF-8 output on Windows so Rich box/unicode characters
+# never crash the cp1252 codec (happens on older Windows terminals)
+if sys.platform == "win32" and sys.stdout.encoding.lower() != "utf-8":
+    os.environ.setdefault("PYTHONUTF8", "1")
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 import click
 from rich import box
 from rich.console import Console
@@ -26,12 +36,7 @@ console = Console()
 
 def _print_kgiit_banner() -> None:
     """Print the main kgiit welcome banner matching the premium aesthetic."""
-    # Force UTF-8 for Windows so block characters don't crash cp1252
-    if sys.stdout.encoding.lower() != 'utf-8' and hasattr(sys.stdout, 'reconfigure'):
-        try:
-            sys.stdout.reconfigure(encoding='utf-8')
-        except Exception:
-            pass
+    # UTF-8 reconfigure is handled at module import level (top of this file)
 
     # The exact block chunks for KGiit to allow vertical column coloring
     chunks = [
