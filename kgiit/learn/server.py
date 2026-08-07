@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import hmac
 
 from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,7 +20,7 @@ EXPECTED_TOKEN = os.environ.get("KGIIT_AUTH_TOKEN")
 
 
 def verify_token(x_auth_token: str = Header(None)):
-    if EXPECTED_TOKEN and x_auth_token != EXPECTED_TOKEN:
+    if EXPECTED_TOKEN and (not x_auth_token or not hmac.compare_digest(x_auth_token, EXPECTED_TOKEN)):
         raise HTTPException(status_code=403,
                             detail="Invalid or missing X-Auth-Token")
     return x_auth_token
