@@ -168,8 +168,8 @@ To exit the application interface at any time, type `/bye` or `q`.
 
 For further technical details and contribution guidelines, please refer to the specific documentation files included in this repository:
 
-- [System Architecture Guide](https://github.com/ShauryaVaid/kgiit/blob/main/ARCHITECTURE.md) - A deep dive into the system design, ML integration, and CLI-GUI communication protocols.
-- [Contributing Guidelines](https://github.com/ShauryaVaid/kgiit/blob/main/CONTRIBUTING.md) - Instructions for setting up a development environment, running the Pytest validation suite, and submitting pull requests.
+- [System Architecture Guide](ARCHITECTURE.md) - A deep dive into the system design, ML integration, and CLI-GUI communication protocols.
+- [Contributing Guidelines](CONTRIBUTING.md) - Instructions for setting up a development environment, running the Pytest validation suite, and submitting pull requests.
 
 ---
 
