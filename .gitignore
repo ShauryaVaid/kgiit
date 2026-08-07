@@ -25,6 +25,10 @@ ENV/
 !CONTRIBUTING.md
 !VERIFICATION.md
 !CHANGELOG.md
+!AGENTS.md
+!AGENTS_AND_SKILLS.md
+!PRD.md
+!TASKS.md
 !.agents/**/*.md
 
 # IDE & OS files
