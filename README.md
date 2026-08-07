@@ -164,7 +164,12 @@ flowchart LR
    ```
 
 3. **Install GUI Dependencies (Optional but recommended):**
-   If you plan to use the graphical interface, you must install the Electron dependencies.
+   If you plan to use the graphical interface, you must install the Electron dependencies using Node.js.
+   
+   > [!NOTE]
+   > **Getting an error like `'npm' is not recognized`?**
+   > This means Node.js is not installed on your system! You must download and install the **LTS (Long Term Support)** version from [nodejs.org](https://nodejs.org/). After installing, you **must close and restart your terminal** before running the command below.
+
    ```bash
    cd gui
    npm install
