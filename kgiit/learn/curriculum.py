@@ -40,9 +40,11 @@ class Lesson:
     instructions: str
     target_command: str
     fixture: str
-    verify: Callable[[SandboxSession, subprocess.CompletedProcess], VerifyResult]
+    verify: Callable[[SandboxSession,
+                      subprocess.CompletedProcess], VerifyResult]
     hint: str  # Fallback hint if ML classifier unavailable
-    setup_steps: list[Callable[[SandboxSession], None]] = field(default_factory=list)
+    setup_steps: list[Callable[[SandboxSession], None]
+                      ] = field(default_factory=list)
     allow_alternate_commands: list[str] = field(default_factory=list)
 
 
@@ -90,12 +92,16 @@ def _branch_exists(sandbox: SandboxSession, branch_name: str) -> bool:
 # Lesson 1: git init
 # ---------------------------------------------------------------------------
 
-def _verify_init(sandbox: SandboxSession, result: subprocess.CompletedProcess) -> VerifyResult:
+def _verify_init(
+        sandbox: SandboxSession,
+        result: subprocess.CompletedProcess) -> VerifyResult:
     """Verify that git init actually created a .git directory."""
     if result.returncode != 0:
         return VerifyResult(
             passed=False,
-            message=f"Command exited with error code {result.returncode}. {result.stderr.strip()}",
+            message=f"Command exited with error code {
+                result.returncode}. {
+                result.stderr.strip()}",
         )
     if not _git_dir_exists(sandbox):
         return VerifyResult(
@@ -125,16 +131,14 @@ LESSON_INIT = Lesson(
         "Your sandbox is an empty directory right now. Initialize a git repo:\n\n"
         "  git init\n\n"
         "After running it, you should see:\n"
-        "  'Initialized empty Git repository in .../repo/.git/'"
-    ),
+        "  'Initialized empty Git repository in .../repo/.git/'"),
     target_command="git init",
     fixture="empty",
     verify=_verify_init,
     hint=(
-        "Try typing exactly: git init\n"
-        "Make sure you haven't added extra arguments. "
-        "git init with no arguments initializes the current directory."
-    ),
+            "Try typing exactly: git init\n"
+            "Make sure you haven't added extra arguments. "
+            "git init with no arguments initializes the current directory."),
 )
 
 
@@ -142,13 +146,15 @@ LESSON_INIT = Lesson(
 # Lesson 2: git status
 # ---------------------------------------------------------------------------
 
-def _verify_status(sandbox: SandboxSession, result: subprocess.CompletedProcess) -> VerifyResult:
+def _verify_status(
+        sandbox: SandboxSession,
+        result: subprocess.CompletedProcess) -> VerifyResult:
     """Verify git status ran and showed something meaningful."""
     if result.returncode != 0:
         return VerifyResult(
-            passed=False,
-            message=f"git status failed (exit {result.returncode}): {result.stderr.strip()}",
-        )
+            passed=False, message=f"git status failed (exit {
+                result.returncode}): {
+                result.stderr.strip()}", )
     output = result.stdout.lower()
     if "nothing to commit" in output or "on branch" in output or "no commits yet" in output:
         return VerifyResult(
@@ -181,15 +187,13 @@ LESSON_STATUS = Lesson(
         "  • Which files are untracked (new files git doesn't know about yet)\n\n"
         "A file called hello.txt has been created in your sandbox.\n\n"
         "Run git status to see it:\n\n"
-        "  git status"
-    ),
+        "  git status"),
     target_command="git status",
     fixture="init",
     verify=_verify_status,
     hint=(
-        "Type: git status\n"
-        "No arguments needed. git status always checks the current repo."
-    ),
+            "Type: git status\n"
+            "No arguments needed. git status always checks the current repo."),
     setup_steps=[_setup_status],
 )
 
@@ -198,13 +202,15 @@ LESSON_STATUS = Lesson(
 # Lesson 3: git add
 # ---------------------------------------------------------------------------
 
-def _verify_add(sandbox: SandboxSession, result: subprocess.CompletedProcess) -> VerifyResult:
+def _verify_add(
+        sandbox: SandboxSession,
+        result: subprocess.CompletedProcess) -> VerifyResult:
     """Verify that hello.txt was staged."""
     if result.returncode != 0:
         return VerifyResult(
-            passed=False,
-            message=f"git add failed (exit {result.returncode}): {result.stderr.strip()}",
-        )
+            passed=False, message=f"git add failed (exit {
+                result.returncode}): {
+                result.stderr.strip()}", )
     staged = _get_staged_files(sandbox)
     if not staged:
         return VerifyResult(
@@ -248,18 +254,18 @@ LESSON_ADD = Lesson(
         "Stage it:\n\n"
         "  git add hello.txt\n\n"
         "After this, run git status to confirm it moved from "
-        "'Untracked files' to 'Changes to be committed'."
-    ),
+        "'Untracked files' to 'Changes to be committed'."),
     target_command="git add hello.txt",
     fixture="init",
     verify=_verify_add,
     hint=(
-        "Try: git add hello.txt\n"
-        "You need to specify the filename. "
-        "'git add' with no arguments does nothing."
-    ),
+            "Try: git add hello.txt\n"
+            "You need to specify the filename. "
+            "'git add' with no arguments does nothing."),
     setup_steps=[_setup_add],
-    allow_alternate_commands=["git add .", "git add -A"],
+    allow_alternate_commands=[
+        "git add .",
+        "git add -A"],
 )
 
 
@@ -267,13 +273,15 @@ LESSON_ADD = Lesson(
 # Lesson 4: git commit
 # ---------------------------------------------------------------------------
 
-def _verify_commit(sandbox: SandboxSession, result: subprocess.CompletedProcess) -> VerifyResult:
+def _verify_commit(
+        sandbox: SandboxSession,
+        result: subprocess.CompletedProcess) -> VerifyResult:
     """Verify a commit was actually created."""
     if result.returncode != 0:
         return VerifyResult(
-            passed=False,
-            message=f"git commit failed (exit {result.returncode}): {result.stderr.strip()}",
-        )
+            passed=False, message=f"git commit failed (exit {
+                result.returncode}): {
+                result.stderr.strip()}", )
     msg = _get_last_commit_message(sandbox)
     if msg is None:
         return VerifyResult(
@@ -328,13 +336,15 @@ LESSON_COMMIT = Lesson(
 # Lesson 5: git branch + git switch
 # ---------------------------------------------------------------------------
 
-def _verify_branch(sandbox: SandboxSession, result: subprocess.CompletedProcess) -> VerifyResult:
+def _verify_branch(
+        sandbox: SandboxSession,
+        result: subprocess.CompletedProcess) -> VerifyResult:
     """Verify that the 'feature' branch was created and we switched to it."""
     if result.returncode != 0:
         return VerifyResult(
-            passed=False,
-            message=f"Command failed (exit {result.returncode}): {result.stderr.strip()}",
-        )
+            passed=False, message=f"Command failed (exit {
+                result.returncode}): {
+                result.stderr.strip()}", )
     # Check current branch
     current = _get_current_branch(sandbox)
     branch_exists = _branch_exists(sandbox, "feature")
@@ -358,16 +368,13 @@ def _verify_branch(sandbox: SandboxSession, result: subprocess.CompletedProcess)
             ),
         )
     return VerifyResult(
-        passed=True,
-        message=(
+        passed=True, message=(
             "✓ You're now on the 'feature' branch!\n\n"
             "Branches are lightweight pointers to commits. Creating one is instant — "
             "git doesn't copy any files. Changes you make here won't affect 'main' "
             "until you explicitly merge them.\n\n"
             "Current branch: feature\n"
-            "Try making a change and committing — it's isolated from main."
-        ),
-    )
+            "Try making a change and committing — it's isolated from main."), )
 
 
 LESSON_BRANCH = Lesson(
@@ -384,17 +391,18 @@ LESSON_BRANCH = Lesson(
         "Or do both in one command (modern git):\n\n"
         "  git switch -c feature\n\n"
         "After switching, any commits you make stay on 'feature' "
-        "until you merge them back to 'main'."
-    ),
+        "until you merge them back to 'main'."),
     target_command="git switch feature",
     fixture="committed",
     verify=_verify_branch,
     hint=(
-        "First create the branch: git branch feature\n"
-        "Then switch to it: git switch feature\n"
-        "Or use the shortcut: git switch -c feature"
-    ),
-    allow_alternate_commands=["git switch -c feature", "git checkout -b feature", "git checkout feature"],
+            "First create the branch: git branch feature\n"
+            "Then switch to it: git switch feature\n"
+            "Or use the shortcut: git switch -c feature"),
+    allow_alternate_commands=[
+        "git switch -c feature",
+        "git checkout -b feature",
+        "git checkout feature"],
 )
 
 
@@ -402,7 +410,9 @@ LESSON_BRANCH = Lesson(
 # Lesson 6: git merge (with conflict)
 # ---------------------------------------------------------------------------
 
-def _verify_merge(sandbox: SandboxSession, result: subprocess.CompletedProcess) -> VerifyResult:
+def _verify_merge(
+        sandbox: SandboxSession,
+        result: subprocess.CompletedProcess) -> VerifyResult:
     """
     Verify git merge ran. Accept either a clean merge or a conflict state —
     both are valid outcomes that teach different things.
@@ -473,16 +483,14 @@ LESSON_MERGE = Lesson(
         "Edit the file to keep what you want, then:\n\n"
         "  git add conflict.txt\n"
         "  git commit -m 'Resolve merge conflict'\n\n"
-        "Conflicts are normal — resolving them is a core git skill."
-    ),
+        "Conflicts are normal — resolving them is a core git skill."),
     target_command="git merge feature",
     fixture="conflict",
     verify=_verify_merge,
     hint=(
-        "Make sure you're on main first: git switch main\n"
-        "Then: git merge feature\n"
-        "A conflict is expected — read the output carefully."
-    ),
+            "Make sure you're on main first: git switch main\n"
+            "Then: git merge feature\n"
+            "A conflict is expected — read the output carefully."),
     allow_alternate_commands=["git merge feature --no-ff"],
 )
 
@@ -491,12 +499,21 @@ LESSON_MERGE = Lesson(
 # Lesson 7: git clone
 # ---------------------------------------------------------------------------
 
-def _verify_clone(sandbox: SandboxSession, result: subprocess.CompletedProcess) -> VerifyResult:
+def _verify_clone(
+        sandbox: SandboxSession,
+        result: subprocess.CompletedProcess) -> VerifyResult:
     if result.returncode != 0:
-        return VerifyResult(False, f"git clone failed: {result.stderr.strip()}")
+        return VerifyResult(
+            False, f"git clone failed: {
+                result.stderr.strip()}")
     if not _git_dir_exists(sandbox):
-        return VerifyResult(False, "The repository was not cloned successfully. Try: git clone ../remote.git .")
-    return VerifyResult(True, "✓ Repository cloned successfully!\n\nNotice the '.' at the end? That tells git to clone directly into your current directory instead of creating a new folder.")
+        return VerifyResult(
+            False,
+            "The repository was not cloned successfully. Try: git clone ../remote.git .")
+    return VerifyResult(
+        True,
+        "✓ Repository cloned successfully!\n\nNotice the '.' at the end? That tells git to clone directly into your current directory instead of creating a new folder.")
+
 
 LESSON_CLONE = Lesson(
     id="collab-01-clone",
@@ -519,16 +536,23 @@ LESSON_CLONE = Lesson(
 # Lesson 8: git push
 # ---------------------------------------------------------------------------
 
+
 def _setup_push(sandbox: SandboxSession) -> None:
     sandbox.run(["git", "clone", "../remote.git", "."])
     sandbox.create_file("hello.txt", "Hello remote!")
     sandbox.run(["git", "add", "hello.txt"])
     sandbox.run(["git", "commit", "-m", "Add hello.txt"])
 
-def _verify_push(sandbox: SandboxSession, result: subprocess.CompletedProcess) -> VerifyResult:
+
+def _verify_push(
+        sandbox: SandboxSession,
+        result: subprocess.CompletedProcess) -> VerifyResult:
     if result.returncode != 0:
         return VerifyResult(False, f"git push failed: {result.stderr.strip()}")
-    return VerifyResult(True, "✓ Code pushed to the remote repository!\n\nYour teammates can now see your commit.")
+    return VerifyResult(
+        True,
+        "✓ Code pushed to the remote repository!\n\nYour teammates can now see your commit.")
+
 
 LESSON_PUSH = Lesson(
     id="collab-02-push",
@@ -538,8 +562,7 @@ LESSON_PUSH = Lesson(
         "You've cloned the repository and made a new commit locally.\n\n"
         "To share this commit with the world, you must push it to the remote server.\n\n"
         "Push your changes to the default branch (main):\n\n"
-        "  git push origin main"
-    ),
+        "  git push origin main"),
     target_command="git push origin main",
     fixture="remote_sim",
     verify=_verify_push,
@@ -552,6 +575,7 @@ LESSON_PUSH = Lesson(
 # Lesson 9: git pull
 # ---------------------------------------------------------------------------
 
+
 def _setup_pull(sandbox: SandboxSession) -> None:
     sandbox.run(["git", "clone", "../remote.git", "."])
     tmp_clone = sandbox.root / "tmp_clone"
@@ -562,12 +586,20 @@ def _setup_pull(sandbox: SandboxSession) -> None:
     sandbox.run(["git", "commit", "-m", "Add update.txt"], cwd=tmp_clone)
     sandbox.run(["git", "push", "origin", "main"], cwd=tmp_clone)
 
-def _verify_pull(sandbox: SandboxSession, result: subprocess.CompletedProcess) -> VerifyResult:
+
+def _verify_pull(
+        sandbox: SandboxSession,
+        result: subprocess.CompletedProcess) -> VerifyResult:
     if result.returncode != 0:
         return VerifyResult(False, f"git pull failed: {result.stderr.strip()}")
     if not (sandbox.repo_dir / "update.txt").exists():
-        return VerifyResult(False, "The update from the teammate is missing. Try running: git pull origin main")
-    return VerifyResult(True, "✓ Code pulled successfully!\n\nYou now have your teammate's changes on your local machine.")
+        return VerifyResult(
+            False,
+            "The update from the teammate is missing. Try running: git pull origin main")
+    return VerifyResult(
+        True,
+        "✓ Code pulled successfully!\n\nYou now have your teammate's changes on your local machine.")
+
 
 LESSON_PULL = Lesson(
     id="collab-03-pull",
@@ -576,8 +608,7 @@ LESSON_PULL = Lesson(
     instructions=(
         "A teammate just pushed a new commit to the remote repository!\n\n"
         "Your local repository is now out of date. To fetch their changes and merge them into your local branch, use:\n\n"
-        "  git pull origin main"
-    ),
+        "  git pull origin main"),
     target_command="git pull origin main",
     fixture="remote_sim",
     verify=_verify_pull,
@@ -594,24 +625,36 @@ GIT_BASICS_TRACK = Track(
     id="git-basics",
     title="Git Basics",
     description="Start from zero: init, status, add, commit. The four commands you'll use every day.",
-    lessons=[LESSON_INIT, LESSON_STATUS, LESSON_ADD, LESSON_COMMIT],
+    lessons=[
+        LESSON_INIT,
+        LESSON_STATUS,
+        LESSON_ADD,
+        LESSON_COMMIT],
 )
 
 BRANCHING_TRACK = Track(
     id="branching",
     title="Branching & Merging",
     description="Work in parallel safely: create branches, switch between them, merge changes.",
-    lessons=[LESSON_BRANCH, LESSON_MERGE],
+    lessons=[
+        LESSON_BRANCH,
+        LESSON_MERGE],
 )
 
 COLLABORATION_TRACK = Track(
     id="collaboration",
     title="Remotes & Collaboration",
     description="Work with others: clone a repo, push your commits, and pull updates.",
-    lessons=[LESSON_CLONE, LESSON_PUSH, LESSON_PULL],
+    lessons=[
+        LESSON_CLONE,
+        LESSON_PUSH,
+        LESSON_PULL],
 )
 
-ALL_TRACKS: list[Track] = [GIT_BASICS_TRACK, BRANCHING_TRACK, COLLABORATION_TRACK]
+ALL_TRACKS: list[Track] = [
+    GIT_BASICS_TRACK,
+    BRANCHING_TRACK,
+    COLLABORATION_TRACK]
 
 
 def get_track(track_id: str) -> Track | None:

@@ -46,7 +46,11 @@ def _print_track_menu() -> None:
     table.add_column("#", style="bold cyan", width=4)
     table.add_column("Track", style="bold white", min_width=22)
     table.add_column("Description", style="dim white")
-    table.add_column("Lessons", style="bold magenta", width=8, justify="center")
+    table.add_column(
+        "Lessons",
+        style="bold magenta",
+        width=8,
+        justify="center")
 
     for idx, track in enumerate(ALL_TRACKS, start=1):
         table.add_row(
@@ -64,7 +68,10 @@ def _print_track_menu() -> None:
 def _select_track() -> Track | None:
     """Interactively select a track."""
     _print_track_menu()
-    console.print(f"[bold bright_white]Choose a track (1–{len(ALL_TRACKS)}) or [q]uit:[/bold bright_white] ", end="")
+    console.print(
+        f"[bold bright_white]Choose a track (1–{
+            len(ALL_TRACKS)}) or [q]uit:[/bold bright_white] ",
+        end="")
 
     try:
         choice = input().strip().lower()
@@ -97,8 +104,10 @@ def _select_mode() -> str:
     console.print(
         "\n[bold bright_white]How would you like to practice?[/bold bright_white]\n"
     )
-    console.print("  [bold bright_green][1][/bold bright_green]  Terminal (Textual TUI) [bold]— recommended[/bold]")
-    console.print("  [bold bright_blue][2][/bold bright_blue]  Graphical window (Electron app)")
+    console.print(
+        "  [bold bright_green][1][/bold bright_green]  Terminal (Textual TUI) [bold]— recommended[/bold]")
+    console.print(
+        "  [bold bright_blue][2][/bold bright_blue]  Graphical window (Electron app)")
     if not has_display:
         console.print(
             "\n  [dim]Note: No display detected (SSH/headless). "
@@ -110,7 +119,8 @@ def _select_mode() -> str:
 
     console.print()
     try:
-        choice = console.input("[bold bright_cyan]Enter choice (1/2, default=1): [/bold bright_cyan]").strip()
+        choice = console.input(
+            "[bold bright_cyan]Enter choice (1/2, default=1): [/bold bright_cyan]").strip()
     except (EOFError, KeyboardInterrupt):
         return "terminal"
 
@@ -125,7 +135,9 @@ def _launch_tui(track: Track, headless: bool = False) -> None:
     app = LearnApp(track=track, headless=headless)
     if headless:
         # In headless mode, run auto-pilot through the first lesson
-        console.print(f"[dim]Headless mode: running track '{track.title}'...[/dim]")
+        console.print(
+            f"[dim]Headless mode: running track '{
+                track.title}'...[/dim]")
         # Textual's headless mode via run(headless=True)
         app.run(headless=True)
     else:
@@ -135,7 +147,7 @@ def _launch_tui(track: Track, headless: bool = False) -> None:
 def _launch_gui(track: Track) -> None:
     """Launch the FastAPI bridge and Electron GUI."""
     console.print("[dim]Starting local backend for GUI...[/dim]")
-    
+
     import secrets
     auth_token = secrets.token_hex(32)
 
@@ -148,9 +160,21 @@ def _launch_gui(track: Track) -> None:
     import urllib.error
 
     # Start FastAPI server
-    uvicorn_cmd = [sys.executable, "-m", "uvicorn", "kgiit.learn.server:app", "--port", "8000", "--host", "127.0.0.1"]
-    server_proc = subprocess.Popen(uvicorn_cmd, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    
+    uvicorn_cmd = [
+        sys.executable,
+        "-m",
+        "uvicorn",
+        "kgiit.learn.server:app",
+        "--port",
+        "8000",
+        "--host",
+        "127.0.0.1"]
+    server_proc = subprocess.Popen(
+        uvicorn_cmd,
+        env=env,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL)
+
     # Fast polling loop instead of sleeping for 1.5s
     for _ in range(50):
         try:
@@ -158,14 +182,24 @@ def _launch_gui(track: Track) -> None:
             break
         except (urllib.error.URLError, ConnectionError):
             time.sleep(0.05)
-    
-    gui_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "gui")
+
+    gui_dir = os.path.join(
+        os.path.dirname(
+            os.path.dirname(
+                os.path.dirname(__file__))),
+        "gui")
     console.print("[dim]Launching Electron GUI...[/dim]")
     # Use npx electron directly to skip npm parsing overhead
-    npm_cmd = ["npx", "electron", "."] if sys.platform != "win32" else ["npx.cmd", "electron", "."]
-    
+    npm_cmd = [
+        "npx",
+        "electron",
+        "."] if sys.platform != "win32" else [
+        "npx.cmd",
+        "electron",
+        "."]
+
     electron_proc = subprocess.Popen(npm_cmd, cwd=gui_dir, env=env)
-    
+
     try:
         electron_proc.wait()
     except KeyboardInterrupt:
@@ -238,7 +272,11 @@ def launch_learn_interactive() -> None:
     help="List available learning tracks and exit.",
 )
 @click.pass_context
-def learn_cmd(ctx: click.Context, track_id: str | None, headless: bool, list_tracks: bool) -> None:
+def learn_cmd(
+        ctx: click.Context,
+        track_id: str | None,
+        headless: bool,
+        list_tracks: bool) -> None:
     """
     kgiit learn — Interactive git practice in an isolated offline sandbox.
 
@@ -273,7 +311,8 @@ def learn_cmd(ctx: click.Context, track_id: str | None, headless: bool, list_tra
     if track_id:
         track = get_track(track_id)
         if track is None:
-            console.print(f"[red]Unknown track '{track_id}'. Use --list-tracks to see options.[/red]")
+            console.print(
+                f"[red]Unknown track '{track_id}'. Use --list-tracks to see options.[/red]")
             sys.exit(1)
         mode = _select_mode()
         if mode == "gui":
@@ -284,7 +323,8 @@ def learn_cmd(ctx: click.Context, track_id: str | None, headless: bool, list_tra
         launch_learn_interactive()
 
 
-@learn_cmd.command(name="demo", help="Automated walkthrough of a lesson (hackathon demo mode).")
+@learn_cmd.command(name="demo",
+                   help="Automated walkthrough of a lesson (hackathon demo mode).")
 def demo_cmd() -> None:
     """Run a hands-free deterministic walkthrough of git basics."""
     import time
@@ -298,43 +338,62 @@ def demo_cmd() -> None:
     track = ALL_TRACKS[0]  # git-basics
     lesson = track.lessons[1]  # 'git status' lesson
 
-    console.print(Panel(f"[bold bright_cyan]kgiit demo[/bold bright_cyan]\nAutomated Walkthrough: {track.title} - {lesson.title}", box=box.ROUNDED, border_style="cyan"))
-    
+    console.print(
+        Panel(
+            f"[bold bright_cyan]kgiit demo[/bold bright_cyan]\nAutomated Walkthrough: {
+                track.title} - {
+                lesson.title}",
+            box=box.ROUNDED,
+            border_style="cyan"))
+
     session = SandboxSession(lesson.fixture)
-    console.print(f"[dim]Started sandbox session: {session.session_id}[/dim]\n")
-    
-    console.print(f"[bold yellow]Prompt:[/bold yellow] {lesson.instructions}\n")
+    console.print(
+        f"[dim]Started sandbox session: {
+            session.session_id}[/dim]\n")
+
+    console.print(
+        f"[bold yellow]Prompt:[/bold yellow] {lesson.instructions}\n")
     time.sleep(1.5)
-    
+
     # 1. Deliberate Mistake
     mistake = "git statu"
-    console.print(f"[bold bright_green]~/sandbox $[/bold bright_green] [white]{mistake}[/white]")
+    console.print(
+        f"[bold bright_green]~/sandbox $[/bold bright_green] [white]{mistake}[/white]")
     time.sleep(1)
-    
+
     proc = session.run(mistake)
-    if proc.stdout: console.print(proc.stdout, end="")
-    if proc.stderr: console.print(f"[red]{proc.stderr}[/red]", end="")
-    
+    if proc.stdout:
+        console.print(proc.stdout, end="")
+    if proc.stderr:
+        console.print(f"[red]{proc.stderr}[/red]", end="")
+
     # Get ML Hint
-    label, conf, hint = classify_mistake(mistake, lesson.target_command, context=session.get_state())
+    label, conf, hint = classify_mistake(
+        mistake, lesson.target_command, context=session.get_state())
     time.sleep(1)
-    console.print(f"[bold magenta]Hint ({label} - {conf*100:.0f}% confidence):[/bold magenta] [italic]{hint}[/italic]\n")
+    console.print(
+        f"[bold magenta]Hint ({label} - {
+            conf *
+            100:.0f}% confidence):[/bold magenta] [italic]{hint}[/italic]\n")
     time.sleep(2)
-    
+
     # 2. Correct command
     correct = "git status"
-    console.print(f"[bold bright_green]~/sandbox $[/bold bright_green] [white]{correct}[/white]")
+    console.print(
+        f"[bold bright_green]~/sandbox $[/bold bright_green] [white]{correct}[/white]")
     time.sleep(1)
-    
+
     proc = session.run(correct)
-    if proc.stdout: console.print(proc.stdout, end="")
-    
+    if proc.stdout:
+        console.print(proc.stdout, end="")
+
     # Verify
     result = lesson.verify(session, proc)
     time.sleep(0.5)
     if result.passed:
-        console.print(f"\n[bold bright_green][SUCCESS][/bold bright_green] {result.message}")
-    
+        console.print(
+            f"\n[bold bright_green][SUCCESS][/bold bright_green] {result.message}")
+
     time.sleep(1)
     session.purge()
     console.print("\n[dim]Sandbox cleaned up. Demo complete.[/dim]")
@@ -366,8 +425,10 @@ def reset_cmd(purge: bool, list_only: bool) -> None:
             from kgiit.learn.sandbox import SANDBOX_ROOT
             for sid in sessions:
                 path = SANDBOX_ROOT / sid
-                size = sum(f.stat().st_size for f in path.rglob("*") if f.is_file())
-                console.print(f"  [cyan]{sid}[/cyan]  [dim]{size // 1024} KB — {path}[/dim]")
+                size = sum(
+                    f.stat().st_size for f in path.rglob("*") if f.is_file())
+                console.print(
+                    f"  [cyan]{sid}[/cyan]  [dim]{size // 1024} KB — {path}[/dim]")
         return
 
     if purge:
@@ -375,4 +436,5 @@ def reset_cmd(purge: bool, list_only: bool) -> None:
             console.print("[dim]No sessions to remove.[/dim]")
             return
         n = purge_all_sessions()
-        console.print(f"[bold green]Removed {n} sandbox session(s).[/bold green]")
+        console.print(
+            f"[bold green]Removed {n} sandbox session(s).[/bold green]")

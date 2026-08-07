@@ -32,7 +32,12 @@ class GitHubClient:
     """Client for interacting with the GitHub REST API."""
 
     BASE_URL = "https://api.github.com"
-    PLACEHOLDER_SUBSTRINGS = ["your_", "your_github", "<your", "example", "placeholder"]
+    PLACEHOLDER_SUBSTRINGS = [
+        "your_",
+        "your_github",
+        "<your",
+        "example",
+        "placeholder"]
 
     def __init__(self, token: str | None = None, base_url: str | None = None):
         """
@@ -40,19 +45,22 @@ class GitHubClient:
         Reads token from parameter, GITHUB_TOKEN, TRIAGE_API_KEY, or API_KEY environment variables.
         Ignores known placeholder values so public GitHub requests succeed unauthenticated.
         """
-        raw_token = token or os.getenv("GITHUB_TOKEN") or os.getenv("TRIAGE_API_KEY") or os.getenv("API_KEY")
+        raw_token = token or os.getenv("GITHUB_TOKEN") or os.getenv(
+            "TRIAGE_API_KEY") or os.getenv("API_KEY")
 
         self.token = None
         if raw_token:
             raw_token = raw_token.strip()
-            # Remove any duplicate prefix if user provided "Bearer token" or "token token"
+            # Remove any duplicate prefix if user provided "Bearer token" or
+            # "token token"
             if raw_token.lower().startswith("bearer "):
                 raw_token = raw_token[7:].strip()
             elif raw_token.lower().startswith("token "):
                 raw_token = raw_token[6:].strip()
 
             # Ignore unconfigured placeholder values
-            is_placeholder = any(p in raw_token.lower() for p in self.PLACEHOLDER_SUBSTRINGS)
+            is_placeholder = any(p in raw_token.lower()
+                                 for p in self.PLACEHOLDER_SUBSTRINGS)
             if not is_placeholder and len(raw_token) > 0:
                 self.token = raw_token
 
@@ -75,13 +83,20 @@ class GitHubClient:
         rate_limit_remaining = response.headers.get("X-RateLimit-Remaining")
 
         if status_code == 404:
-            raise GitHubNotFoundError(f"Resource not found (404): {response.text}")
+            raise GitHubNotFoundError(
+                f"Resource not found (404): {
+                    response.text}")
         elif status_code == 403 and rate_limit_remaining == "0":
-            raise GitHubRateLimitError(f"GitHub API rate limit exceeded (403): {response.text}")
+            raise GitHubRateLimitError(
+                f"GitHub API rate limit exceeded (403): {
+                    response.text}")
         elif status_code in (401, 403):
-            raise GitHubAuthError(f"Authentication/Authorization error ({status_code}): {response.text}")
+            raise GitHubAuthError(
+                f"Authentication/Authorization error ({status_code}): {response.text}")
         else:
-            raise GitHubAPIError(f"GitHub API request failed with status {status_code}: {response.text}")
+            raise GitHubAPIError(
+                f"GitHub API request failed with status {status_code}: {
+                    response.text}")
 
     def _normalize_issue(self, raw_issue: dict[str, Any]) -> dict[str, Any]:
         """
@@ -110,7 +125,8 @@ class GitHubClient:
             "comments": raw_issue.get("comments", 0),
         }
 
-    def get_issue(self, owner: str, repo: str, issue_number: int) -> dict[str, Any]:
+    def get_issue(self, owner: str, repo: str,
+                  issue_number: int) -> dict[str, Any]:
         """Fetch details for a single issue by owner, repo, and issue_number."""
         url = f"{self.base_url}/repos/{owner}/{repo}/issues/{issue_number}"
         response = self.session.get(url)
@@ -123,4 +139,5 @@ class GitHubClient:
         params = {"state": "open"}
         response = self.session.get(url, params=params)
         data = self._handle_response(response)
-        return [self._normalize_issue(item) for item in data if isinstance(item, dict)]
+        return [self._normalize_issue(item)
+                for item in data if isinstance(item, dict)]

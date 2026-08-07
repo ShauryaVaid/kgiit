@@ -35,6 +35,7 @@ from kgiit.learn.sandbox import SandboxEscapeError, SandboxSession
 # Status Pane
 # ---------------------------------------------------------------------------
 
+
 class StatusPane(Static):
     """Live git status display, refreshed after every command."""
 
@@ -81,7 +82,7 @@ class StatusPane(Static):
             for f in staged[:4]:
                 lines.append(f"  [green]+ {f}[/green]")
             if len(staged) > 4:
-                lines.append(f"  [dim]... +{len(staged)-4} more[/dim]")
+                lines.append(f"  [dim]... +{len(staged) - 4} more[/dim]")
         else:
             lines.append("[dim]Staged: (none)[/dim]")
 
@@ -257,8 +258,8 @@ class LearnApp(App):
         lesson_num = idx + 1
         total = len(self.lessons)
         log.write(
-            f"[bold bright_magenta]━━━ Lesson {lesson_num}/{total}: {lesson.title} ━━━[/bold bright_magenta]\n"
-        )
+            f"[bold bright_magenta]━━━ Lesson {lesson_num}/{total}: {
+                lesson.title} ━━━[/bold bright_magenta]\n")
         log.write(
             f"[bold bright_yellow]Concept:[/bold bright_yellow] "
             f"[white]{lesson.concept}[/white]\n"
@@ -275,8 +276,7 @@ class LearnApp(App):
         log.write(f"\n[dim]{'─' * 60}[/dim]")
         log.write(
             "[dim]Meta-commands: [bold]hint[/bold] | [bold]skip[/bold] | "
-            "[bold]tracks[/bold] | [bold]reset[/bold] | [bold]quit[/bold][/dim]\n"
-        )
+            "[bold]tracks[/bold] | [bold]reset[/bold] | [bold]quit[/bold][/dim]\n")
 
     def _show_completion(self) -> None:
         """Show track completion message."""
@@ -320,7 +320,8 @@ class LearnApp(App):
         event.input.value = ""
 
         log = self.query_one("#scrollback", RichLog)
-        log.write(f"\n[bold bright_magenta]$[/bold bright_magenta] [bold white]{command}[/bold white]")
+        log.write(
+            f"\n[bold bright_magenta]$[/bold bright_magenta] [bold white]{command}[/bold white]")
 
         # Handle meta-commands
         cmd_lower = command.lower()
@@ -340,12 +341,15 @@ class LearnApp(App):
             from kgiit.learn.curriculum import ALL_TRACKS
             log.write("\n[bold cyan]Available Tracks:[/bold cyan]")
             for t in ALL_TRACKS:
-                log.write(f"  • [bold]{t.title}[/bold] ({len(t.lessons)} lessons)")
-            log.write("[dim]To switch tracks, type 'quit' and run 'kgiit learn' again to select a new one.[/dim]")
+                log.write(
+                    f"  • [bold]{t.title}[/bold] ({len(t.lessons)} lessons)")
+            log.write(
+                "[dim]To switch tracks, type 'quit' and run 'kgiit learn' again to select a new one.[/dim]")
             return
 
         # Execute the command in the sandbox
-        if self.sandbox is None or self.current_lesson_idx >= len(self.lessons):
+        if self.sandbox is None or self.current_lesson_idx >= len(
+                self.lessons):
             log.write("[red]No active lesson sandbox.[/red]")
             return
 
@@ -389,17 +393,21 @@ class LearnApp(App):
         elif not verify_result.passed:
             # Call ML classifier for a hint
             context = {
-                "has_staged": len(self.sandbox.get_state().get("staged", [])) > 0,
-                "has_unstaged": len(self.sandbox.get_state().get("unstaged", [])) > 0,
-                "is_init": self.sandbox.get_state().get("is_repo", False),
-            }
+                "has_staged": len(
+                    self.sandbox.get_state().get(
+                        "staged", [])) > 0, "has_unstaged": len(
+                    self.sandbox.get_state().get(
+                        "unstaged", [])) > 0, "is_init": self.sandbox.get_state().get(
+                    "is_repo", False), }
             ml_label, confidence, hint_text = classify_mistake(
                 typed=command,
                 expected=lesson.target_command,
                 context=context,
             )
-            conf_str = f"(ML: {ml_label}, {confidence:.0%})" if confidence > 0 else f"(Rule: {ml_label})"
-            log.write(f"\n[bold yellow]✗ Not quite... {conf_str}[/bold yellow]")
+            conf_str = f"(ML: {ml_label}, {
+                confidence:.0%})" if confidence > 0 else f"(Rule: {ml_label})"
+            log.write(
+                f"\n[bold yellow]✗ Not quite... {conf_str}[/bold yellow]")
             log.write("\n[bold yellow]Hint:[/bold yellow]")
             for line in hint_text.split("\n"):
                 log.write(f"[yellow]{line}[/yellow]")
@@ -413,7 +421,8 @@ class LearnApp(App):
     def action_quit(self) -> None:
         """Quit the practice session."""
         if self.sandbox:
-            # Clean up temp sandbox dir? Keep it for now — user might want to inspect
+            # Clean up temp sandbox dir? Keep it for now — user might want to
+            # inspect
             pass
         self.exit()
 
@@ -454,5 +463,5 @@ class LearnApp(App):
         for line in lesson.hint.split("\n"):
             log.write(f"[yellow]{line}[/yellow]")
         log.write(
-            f"\n[dim]Target command: [bold]{lesson.target_command}[/bold][/dim]"
-        )
+            f"\n[dim]Target command: [bold]{
+                lesson.target_command}[/bold][/dim]")

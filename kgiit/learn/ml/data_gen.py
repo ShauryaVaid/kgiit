@@ -151,42 +151,65 @@ COMMAND_SPECS = [
     CommandSpec(
         expected="git init",
         context={"has_staged": 0, "has_unstaged": 0, "is_init": 0},
-        wrong_subcommands=["git initialize", "git start", "git new", "git create", "git setup"],
+        wrong_subcommands=[
+            "git initialize",
+            "git start",
+            "git new",
+            "git create",
+            "git setup"],
         deprecated_forms=["git init ."],
         partial_forms=["init", "git"],
     ),
     CommandSpec(
         expected="git status",
         context={"has_staged": 0, "has_unstaged": 1, "is_init": 1},
-        wrong_subcommands=["git stat", "git state", "git show", "git info", "git check"],
+        wrong_subcommands=[
+            "git stat",
+            "git state",
+            "git show",
+            "git info",
+            "git check"],
         deprecated_forms=["git status -s"],
         partial_forms=["git", "status"],
     ),
     CommandSpec(
         expected="git add hello.txt",
         context={"has_staged": 0, "has_unstaged": 1, "is_init": 1},
-        wrong_subcommands=["git stage hello.txt", "git track hello.txt", "git include hello.txt"],
+        wrong_subcommands=[
+            "git stage hello.txt",
+            "git track hello.txt",
+            "git include hello.txt"],
         deprecated_forms=["git add -u hello.txt"],
         partial_forms=["git add", "git add .txt"],
     ),
     CommandSpec(
         expected='git commit -m "Add hello.txt"',
         context={"has_staged": 1, "has_unstaged": 0, "is_init": 1},
-        wrong_subcommands=["git save", "git snapshot", "git record", "git push"],
+        wrong_subcommands=[
+            "git save",
+            "git snapshot",
+            "git record",
+            "git push"],
         deprecated_forms=["git commit --message 'Add hello.txt'"],
         partial_forms=["git commit", "git commit -m"],
     ),
     CommandSpec(
         expected="git switch feature",
         context={"has_staged": 0, "has_unstaged": 0, "is_init": 1},
-        wrong_subcommands=["git change feature", "git move feature", "git go feature"],
+        wrong_subcommands=[
+            "git change feature",
+            "git move feature",
+            "git go feature"],
         deprecated_forms=["git checkout feature"],
         partial_forms=["git switch", "git branch feature"],
     ),
     CommandSpec(
         expected="git merge feature",
         context={"has_staged": 0, "has_unstaged": 0, "is_init": 1},
-        wrong_subcommands=["git join feature", "git combine feature", "git pull feature"],
+        wrong_subcommands=[
+            "git join feature",
+            "git combine feature",
+            "git pull feature"],
         deprecated_forms=["git merge --no-ff feature"],
         partial_forms=["git merge", "git branch -m feature"],
     ),
@@ -245,14 +268,20 @@ def _generate_for_spec(spec: CommandSpec, n_per_class: int = 30) -> list[dict]:
     for i, p in enumerate(parts):
         if p.startswith("-"):
             # Swap the flag character
-            bad_flag = "-" + random.choice("abcdefghijklnopqrstvwxyzABCDEFMNOPQRSTVWXYZ")
+            bad_flag = "-" + \
+                random.choice("abcdefghijklnopqrstvwxyzABCDEFMNOPQRSTVWXYZ")
             bad_parts = parts[:i] + [bad_flag] + parts[i + 1:]
             flag_variants.append(" ".join(bad_parts))
     if not flag_variants:
         # Add a spurious flag
-        flag_variants = [expected + " --verbose", expected + " -v", expected + " -f", expected + " --dry-run"]
+        flag_variants = [
+            expected + " --verbose",
+            expected + " -v",
+            expected + " -f",
+            expected + " --dry-run"]
     for i in range(n_per_class):
-        rows.append(_make_row(flag_variants[i % len(flag_variants)], expected, "WRONG_FLAG", ctx))
+        rows.append(_make_row(flag_variants[i % len(
+            flag_variants)], expected, "WRONG_FLAG", ctx))
 
     # MISSING_ARG — remove trailing argument
     parts = expected.split()
@@ -264,7 +293,13 @@ def _generate_for_spec(spec: CommandSpec, n_per_class: int = 30) -> list[dict]:
         rows.append(_make_row(missing_arg, expected, "MISSING_ARG", ctx))
 
     # EXTRA_ARG — add a spurious extra argument
-    extra_args = ["--verbose", "--dry-run", "--all", "extra_file.txt", "--force", "-v"]
+    extra_args = [
+        "--verbose",
+        "--dry-run",
+        "--all",
+        "extra_file.txt",
+        "--force",
+        "-v"]
     for i in range(n_per_class):
         extra = expected + " " + random.choice(extra_args)
         rows.append(_make_row(extra, expected, "EXTRA_ARG", ctx))
@@ -277,7 +312,12 @@ def _generate_for_spec(spec: CommandSpec, n_per_class: int = 30) -> list[dict]:
     # WRONG_CONTEXT_STATE — right command, wrong context flags
     bad_ctx = {k: (1 - v) if isinstance(v, int) else v for k, v in ctx.items()}
     for _ in range(n_per_class):
-        rows.append(_make_row(expected, expected, "WRONG_CONTEXT_STATE", bad_ctx))
+        rows.append(
+            _make_row(
+                expected,
+                expected,
+                "WRONG_CONTEXT_STATE",
+                bad_ctx))
 
     # WRONG_ORDER — e.g. "commit" before "add"
     wrong_order_cmds = [
@@ -300,7 +340,8 @@ def _generate_for_spec(spec: CommandSpec, n_per_class: int = 30) -> list[dict]:
         expected.replace('"', "").replace("'", ""),
     ]
     for i in range(n_per_class):
-        rows.append(_make_row(syntax_errors[i % len(syntax_errors)], expected, "SYNTAX_ERROR", ctx))
+        rows.append(_make_row(syntax_errors[i % len(
+            syntax_errors)], expected, "SYNTAX_ERROR", ctx))
 
     # DEPRECATED_USAGE
     for i in range(n_per_class):
@@ -319,7 +360,8 @@ def _generate_for_spec(spec: CommandSpec, n_per_class: int = 30) -> list[dict]:
         "npm install", "pip install requests",
     ]
     for i in range(n_per_class):
-        rows.append(_make_row(unknowns[i % len(unknowns)], expected, "UNKNOWN", ctx))
+        rows.append(_make_row(unknowns[i %
+                                       len(unknowns)], expected, "UNKNOWN", ctx))
 
     return rows
 

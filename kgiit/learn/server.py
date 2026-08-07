@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import os
 import subprocess
-from typing import Optional
 
 from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,16 +17,22 @@ from kgiit.learn.sandbox import SandboxSession, SandboxCommandError
 # Ensure the auth token exists if running under CLI bridge
 EXPECTED_TOKEN = os.environ.get("KGIIT_AUTH_TOKEN")
 
+
 def verify_token(x_auth_token: str = Header(None)):
     if EXPECTED_TOKEN and x_auth_token != EXPECTED_TOKEN:
-        raise HTTPException(status_code=403, detail="Invalid or missing X-Auth-Token")
+        raise HTTPException(status_code=403,
+                            detail="Invalid or missing X-Auth-Token")
     return x_auth_token
 
-app = FastAPI(title="kgiit GUI Bridge", dependencies=[Depends(verify_token)] if EXPECTED_TOKEN else [])
+
+app = FastAPI(title="kgiit GUI Bridge", dependencies=[
+              Depends(verify_token)] if EXPECTED_TOKEN else [])
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Since it's a local Electron app, we allow file:// etc, but the Auth Token is the actual protection
+    # Since it's a local Electron app, we allow file:// etc, but the Auth
+    # Token is the actual protection
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -37,11 +42,14 @@ app.add_middleware(
 # mapping: session_id -> SandboxSession
 _sessions: dict[str, SandboxSession] = {}
 
+
 class TrackStartRequest(BaseModel):
     track_id: str
 
+
 class ExecuteRequest(BaseModel):
     command: str
+
 
 @app.get("/api/tracks")
 def list_tracks():
@@ -55,33 +63,35 @@ def list_tracks():
         for t in ALL_TRACKS
     ]
 
+
 @app.post("/api/session/start")
 def start_session(req: TrackStartRequest):
     track = get_track(req.track_id)
     if not track:
         raise HTTPException(status_code=404, detail="Track not found")
-    
+
     # We will just start with the first lesson's fixture
     first_lesson = track.lessons[0]
     session = SandboxSession(first_lesson.fixture)
     _sessions[session.session_id] = session
     return {
-        "session_id": session.session_id, 
-        "track_title": track.title, 
-        "lesson_title": first_lesson.title, 
+        "session_id": session.session_id,
+        "track_title": track.title,
+        "lesson_title": first_lesson.title,
         "lesson_prompt": first_lesson.instructions,
         "total_lessons": len(track.lessons),
         "current_index": 0
     }
 
+
 @app.post("/api/session/{session_id}/execute")
 def execute_command(session_id: str, req: ExecuteRequest):
     if session_id not in _sessions:
         raise HTTPException(status_code=404, detail="Session not found")
-    
+
     session = _sessions[session_id]
     command = req.command.strip()
-    
+
     try:
         proc = session.run_user_command(command)
         return {
@@ -113,43 +123,50 @@ def execute_command(session_id: str, req: ExecuteRequest):
             "stderr": f"System Error: {e}"
         }
 
+
 @app.get("/api/session/{session_id}/status")
 def get_status(session_id: str):
     if session_id not in _sessions:
         raise HTTPException(status_code=404, detail="Session not found")
-    
+
     session = _sessions[session_id]
     state = session.get_state()
     return state
+
 
 @app.post("/api/session/{session_id}/verify")
 def verify_lesson(session_id: str, req: dict):
     if session_id not in _sessions:
         raise HTTPException(status_code=404, detail="Session not found")
-    
+
     track_id = req.get("track_id")
     lesson_index = req.get("lesson_index", 0)
     last_command = req.get("last_command", "")
     exit_code = req.get("exit_code", 0)
     stdout = req.get("stdout", "")
     stderr = req.get("stderr", "")
-    
+
     track = get_track(track_id)
     if not track or lesson_index >= len(track.lessons):
         raise HTTPException(status_code=400, detail="Invalid track or lesson")
-        
+
     lesson = track.lessons[lesson_index]
     session = _sessions[session_id]
-    
+
     # Mock a CompletedProcess for the verify signature
-    mock_proc = subprocess.CompletedProcess(args=last_command, returncode=exit_code, stdout=stdout, stderr=stderr)
-    
+    mock_proc = subprocess.CompletedProcess(
+        args=last_command,
+        returncode=exit_code,
+        stdout=stdout,
+        stderr=stderr)
+
     result = lesson.verify(session, mock_proc)
-    
+
     hint = None
     if not result.passed and last_command.startswith("git "):
-        _, _, hint = classify_mistake(last_command, lesson.target_command, context=session.get_state())
-        
+        _, _, hint = classify_mistake(
+            last_command, lesson.target_command, context=session.get_state())
+
     return {
         "passed": result.passed,
         "message": result.message,
@@ -157,29 +174,31 @@ def verify_lesson(session_id: str, req: dict):
         "expected_command": lesson.target_command
     }
 
+
 @app.post("/api/session/{session_id}/lesson/{lesson_index}/setup")
 def setup_lesson(session_id: str, lesson_index: int, req: dict):
     if session_id not in _sessions:
         raise HTTPException(status_code=404, detail="Session not found")
-    
+
     track_id = req.get("track_id")
     track = get_track(track_id)
     if not track or lesson_index >= len(track.lessons):
         raise HTTPException(status_code=400, detail="Invalid track or lesson")
-        
+
     lesson = track.lessons[lesson_index]
     session = _sessions[session_id]
-    
+
     # Reset to the fixture for this lesson
     session.fixture = lesson.fixture
     session.reset()
-    
+
     return {
         "lesson_title": lesson.title,
         "lesson_prompt": lesson.instructions,
         "total_lessons": len(track.lessons),
         "current_index": lesson_index
     }
+
 
 @app.post("/api/session/{session_id}/stop")
 def stop_session(session_id: str):
@@ -188,6 +207,7 @@ def stop_session(session_id: str):
         del _sessions[session_id]
     return {"status": "ok"}
 
+
 @app.get("/api/git/log")
 def get_git_log(repo_path: str, skip: int = 0):
     """
@@ -195,11 +215,13 @@ def get_git_log(repo_path: str, skip: int = 0):
     Enforces strict path canonicalization, .git directory validation, and subprocess hardening.
     """
     canonical_path = os.path.realpath(repo_path)
-    
+
     # Path validation: must contain a .git directory or file
     git_dir = os.path.join(canonical_path, ".git")
     if not os.path.exists(git_dir):
-        raise HTTPException(status_code=400, detail="Provided path is not a valid git repository (missing .git)")
+        raise HTTPException(
+            status_code=400,
+            detail="Provided path is not a valid git repository (missing .git)")
 
     # Hardened subprocess call
     cmd = [
@@ -210,7 +232,7 @@ def get_git_log(repo_path: str, skip: int = 0):
         "--max-count=500",
         f"--skip={skip}"
     ]
-    
+
     try:
         proc = subprocess.run(
             cmd,
@@ -221,11 +243,17 @@ def get_git_log(repo_path: str, skip: int = 0):
             timeout=10
         )
     except FileNotFoundError:
-        raise HTTPException(status_code=500, detail="git executable not found on PATH.")
+        raise HTTPException(status_code=500,
+                            detail="git executable not found on PATH.")
     except subprocess.TimeoutExpired:
-        raise HTTPException(status_code=504, detail="Git log operation timed out (10s limit).")
+        raise HTTPException(
+            status_code=504,
+            detail="Git log operation timed out (10s limit).")
     except subprocess.CalledProcessError as e:
-        raise HTTPException(status_code=500, detail=f"Git log failed: {e.stderr}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Git log failed: {
+                e.stderr}")
 
     commits = []
     # Parse the null-byte delimited output
@@ -242,5 +270,5 @@ def get_git_log(repo_path: str, skip: int = 0):
                 "refs": parts[4].strip(" ()"),
                 "message": parts[5]
             })
-            
+
     return {"commits": commits, "repo": canonical_path}
