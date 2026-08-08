@@ -30,6 +30,14 @@
 ### Why This Project Exists
 Version control is often an intimidating hurdle for new developers. **KGiit was built specifically to lower the barrier to entry for beginners.** As major open-source initiatives like **Google Summer of Code (GSoC) 2027** approach, having a strong, practical grasp of Git is critical for students wanting to contribute to real-world projects. KGiit provides a safe, interactive, and AI-assisted sandbox where students can practice branching, merging, and collaboration without fear, ensuring they are fully prepared for open-source development when the time comes.
 
+### Hackathon Alignment
+**Track B: Developer Productivity Tools**  
+This project is submitted under Track B, addressing the directive to "build a tool that helps software teams themselves." 
+
+KGiit aligns directly with the track's primary examples through its dual-engine architecture:
+- **Analyze Engine:** Implements the required *"bug-triage assistant that reads incoming issues and suggests labels, severity, and likely owners."*
+- **Learn Engine:** Functions as an educational productivity tool, enabling students to safely learn version control fundamentals before contributing to production repositories.
+
 ### What is KGiit?
 **KGiit** is an advanced, dual-engine Command Line Interface designed for modern software engineering education and repository management. It serves as both a completely offline educational sandbox for mastering Git workflows and an active, network-connected diagnostic engine for analyzing live GitHub repositories.
 
