@@ -102,7 +102,7 @@ jobs:
 
       - name: Install Playwright
         run: |
-          npm ci
+          npm install
           npx playwright install --with-deps chromium
 
       - name: Run Playwright E2E tests
