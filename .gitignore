@@ -31,6 +31,19 @@ ENV/
 !TASKS.md
 !.agents/**/*.md
 
+# Testing & coverage artifacts
+.coverage
+.coverage.*
+htmlcov/
+*.lcov
+.pytest_cache/
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
 # IDE & OS files
 .vscode/
 .idea/

@@ -464,16 +464,11 @@ LESSON_MERGE = Lesson(
         "Time to merge the 'feature' branch back into 'main'.\n\n"
         "This sandbox has a conflict pre-seeded: both 'main' and 'feature' "
         "changed the same line in conflict.txt.\n\n"
-        "First, make sure you're on main:\n\n"
-        "  git switch main\n\n"
-        "Then merge the feature branch:\n\n"
+        "We are already on the 'main' branch. Merge the feature branch:\n\n"
         "  git merge feature\n\n"
-        "Git will tell you there's a CONFLICT. That's expected! Open conflict.txt "
-        "and you'll see conflict markers (<<<<<<<, =======, >>>>>>>). "
-        "Edit the file to keep what you want, then:\n\n"
-        "  git add conflict.txt\n"
-        "  git commit -m 'Resolve merge conflict'\n\n"
-        "Conflicts are normal — resolving them is a core git skill."),
+        "Once you run this, git will report a CONFLICT. That's expected! "
+        "The lesson will automatically complete and show you how to manually resolve it."
+    ),
     target_command="git merge feature",
     fixture="conflict",
     verify=_verify_merge,

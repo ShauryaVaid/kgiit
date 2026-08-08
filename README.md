@@ -59,7 +59,7 @@ Added in **v1.1.0**, KGiit features a rich, interactive Git History Viewer integ
 KGiit differentiates itself from standard terminal utilities through its integration of custom-trained, locally executing Machine Learning models.
 
 ### Typo Correction & Command Classification
-In the offline learning sandbox, students often make syntactical errors when attempting complex Git commands. KGiit intercepts these failures and passes the erroneous input through a localized classification model. The model calculates string distance heuristics and semantic intent to predict the user's intended Git command, providing immediate, context-aware pedagogical hints rather than standard terminal error codes.
+In the offline learning sandbox, students often make syntactical errors when attempting complex Git commands. KGiit intercepts these failures and passes the erroneous input through a localized classification model. Powered by a scikit-learn Random Forest pipeline, the algorithm uses string distance heuristics and semantic feature extraction to accurately predict the user's intended Git command, providing immediate, context-aware pedagogical hints rather than standard terminal error codes.
 
 <div align="center">
   <img src="assets/images/learn-gui-hints.png" alt="GUI Sandbox with ML Hints" width="80%">
