@@ -7,7 +7,7 @@ name = "kgiit"
 version = "1.2.0"
 description = "Two doors, one CLI: analyze real GitHub issues + learn git in an offline sandbox."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     { name = "Shaurya Vaid" }

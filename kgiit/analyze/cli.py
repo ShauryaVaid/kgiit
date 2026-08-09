@@ -17,6 +17,7 @@ Write-back (--apply):
 from __future__ import annotations
 
 import sys
+from kgiit import __version__
 
 import click
 
@@ -71,7 +72,7 @@ except ImportError:
         "Run 'kgiit log' to view the audit trail."
     ),
 )
-@click.version_option(version="1.0.0", prog_name="kgiit analyze")
+@click.version_option(version=__version__, prog_name="kgiit analyze")
 @click.option("--repo",
               required=True,
               help="Target GitHub repository in owner/name format (e.g. octocat/Hello-World).",

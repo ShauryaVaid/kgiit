@@ -1,7 +1,7 @@
 # KGiit System Architecture
 
-**Version:** 1.1.0  
-**Last Updated:** August 7, 2026
+**Version:** 1.2.0  
+**Last Updated:** August 9, 2026
 
 KGiit is a dual-engine, local-first developer tool with a clean separation between
 its two operating modes. All processing happens on the user's machine — no cloud
@@ -15,6 +15,7 @@ backend, no LLM, no telemetry.
 graph TD
     A([Developer / Student]) -->|kgiit analyze| B[Analyze Engine]
     A -->|kgiit learn| C[Learn Engine]
+    A -->|kgiit log| W[Audit Log Viewer]
 
     B --> D[GitHub REST API]
     B --> E[NLP Skill Pipeline]
@@ -22,6 +23,12 @@ graph TD
     E --> E2[duplicate-detector skill]
     E --> E3[priority-ranker skill]
     E --> E4[triage-summary skill]
+
+    B -->|--apply flag| WB[Write-Back Engine]
+    WB -->|human confirms| D
+    WB --> AL[action_log.py]
+    AL -->|append| JSONL[(kgiit-action-log.jsonl)]
+    W --> JSONL
 
     C --> F[FastAPI Server :127.0.0.1:8765]
     C --> G[Sandbox Session]
@@ -69,7 +76,78 @@ sequenceDiagram
 
 ---
 
-## 3. Data Flow: Learn Mode (TUI Path)
+## 3. Data Flow: Confirmed Write-Back (Round 2 — HowToAlgo ADLC)
+
+This flow is the implementation of the HowToAlgo **Agent-Driven Lifecycle (ADLC)** pattern:
+**AI suggests → Human decides → System acts → Every outcome is logged.**
+The human is never bypassed; there is no `--yes` flag.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant CLI as analyze/cli.py
+    participant WB as writeback.py
+    participant GH as github_client.py
+    participant AL as action_log.py
+    participant FS as kgiit-action-log.jsonl
+
+    User->>CLI: kgiit analyze --repo o/r --issue 42 --apply
+    CLI->>GH: get_issue(owner, repo, 42)
+    GH-->>CLI: Issue dict
+    CLI->>WB: classify_issue() via skills.py [UNCHANGED]
+    WB-->>CLI: {label, severity, owner, reason}
+    CLI->>WB: build_suggestion_labels(classification)
+    WB-->>CLI: ["bug/auth", "priority:high"]
+    CLI->>GH: get_authenticated_user() — verify identity
+    GH-->>CLI: {login: "ShauryaVaid"}
+    CLI-->>User: Rich preview panel (what will change + who confirms)
+    User->>CLI: Explicit y/N prompt (NO bypass flag)
+
+    alt User types N
+        CLI->>WB: decline_suggestion(...)
+        WB->>AL: log_action(status=declined)
+        AL->>FS: append JSON line
+        CLI-->>User: Declined panel
+    else User types Y
+        CLI->>WB: apply_suggestion(client, ...)
+        WB->>GH: add_labels(owner, repo, 42, ["bug/auth","priority:high"])
+        GH->>GH: _guarded_call() — catches network errors
+        GH-->>WB: [labels now on issue] OR raises GitHubAPIError
+        alt Success
+            WB->>AL: log_action(status=applied, result=...)
+            AL->>FS: append JSON line
+            WB-->>CLI: ok=True, labels_now_on_issue
+            CLI-->>User: Applied panel
+        else Any failure (network/auth/422/unexpected)
+            WB->>AL: log_action(status=failed, error=...)
+            AL->>FS: append JSON line
+            WB-->>CLI: ok=False, error=str(exc)
+            CLI-->>User: Failed panel + sys.exit(1)
+        end
+    end
+
+    User->>CLI: kgiit log
+    CLI->>AL: read_log()
+    AL->>FS: read all lines
+    FS-->>CLI: list of entries
+    CLI-->>User: Rich audit table (newest first)
+```
+
+### Safeguards baked into this flow
+
+| Guard | Where enforced | What happens if violated |
+|-------|---------------|-------------------------|
+| No `--yes` bypass | `analyze/cli.py` | Flag does not exist |
+| Single-issue scope | `analyze/cli.py` | `--apply + --all-open` → `sys.exit(1)` before any network call |
+| Token required for writes | `github_client.py:add_labels()` | `GitHubAuthError` before any network call |
+| Network guard | `github_client.py:_guarded_call()` | `RequestException` → `GitHubAPIError` → logged as `failed` |
+| Verified identity | `writeback.py:resolve_identity()` | `GET /user` → `github:login`, falls back to OS user |
+| Additive writes only | `github_client.py:add_labels()` | POST `/labels` (append), never PATCH (overwrite) |
+| Every outcome logged | `action_log.py:log_action()` | Even declines and failures have a durable local record |
+
+---
+
+## 4. Data Flow: Learn Mode (TUI Path)
 
 ```mermaid
 sequenceDiagram
@@ -113,7 +191,7 @@ sequenceDiagram
 
 ---
 
-## 4. Data Flow: Learn Mode (GUI Path)
+## 5. Data Flow: Learn Mode (GUI Path)
 
 ```mermaid
 sequenceDiagram
@@ -146,7 +224,7 @@ sequenceDiagram
 
 ---
 
-## 5. Stack & Dependencies
+## 6. Stack & Dependencies
 
 ### Core Python Package (`kgiit/`)
 
@@ -184,19 +262,24 @@ sequenceDiagram
 
 ---
 
-## 6. Module Structure
+## 7. Module Structure
 
 ```
 kgiit/
-├── __init__.py          # version string: __version__ = "1.1.0"
-├── cli.py               # Root Click group + interactive menu
+├── __init__.py          # version string: __version__ = "1.2.0"
+├── cli.py               # Root Click group + interactive TUI menu (4 options)
 ├── analyze/
-│   ├── __init__.py
-│   ├── cli.py           # `kgiit analyze` subcommand
-│   ├── github_client.py # GitHub REST API wrapper (paginated fetching)
-│   ├── skills.py        # classify_issue(), detect_duplicates(), rank_priorities(), build_analyze_summary()
-│   ├── formatting.py    # Rich table renderer
-│   └── report.py        # Markdown report generator
+│   ├── __init__.py      # re-exports all public API incl. new write-back symbols
+│   ├── cli.py           # `kgiit analyze` subcommand + --apply/--dual-approval/--log-file
+│   ├── github_client.py # GitHub REST API wrapper + add_labels() + get_authenticated_user()
+│   │                    #   + _guarded_call() network guard + GitHubValidationError
+│   ├── skills.py        # classify_issue(), detect_duplicates(), rank_priorities()
+│   │                    #   [UNTOUCHED in Round 2 — proof of clean architecture]
+│   ├── formatting.py    # Rich renderer + print_writeback_preview/result/action_log_table
+│   ├── report.py        # Markdown report generator
+│   ├── action_log.py    # [NEW] Append-only JSONL audit trail (pure file I/O)
+│   ├── writeback.py     # [NEW] Confirmed write-back orchestration (zero UI code)
+│   └── log_cli.py       # [NEW] `kgiit log` command — reads audit trail offline
 └── learn/
     ├── __init__.py
     ├── cli.py           # `kgiit learn` subcommand + demo mode
@@ -215,7 +298,7 @@ kgiit/
 
 ---
 
-## 7. Security Model
+## 8. Security Model
 
 ### CSRF Protection (GUI Bridge)
 
@@ -262,7 +345,7 @@ The sandbox can never modify the user's real git configuration or filesystem.
 
 ---
 
-## 8. ML Pipeline
+## 9. ML Pipeline
 
 ### Training Data
 - Generated by `kgiit/learn/ml/data_gen.py`
@@ -302,7 +385,7 @@ Input: (typed_command, expected_command, context_dict)
 
 ---
 
-## 9. CI/CD Pipeline
+## 10. CI/CD Pipeline
 
 Two workflows run on every push to `main` and every pull request:
 
@@ -321,7 +404,7 @@ Two workflows run on every push to `main` and every pull request:
 
 ---
 
-## 10. Ports & Protocols
+## 11. Ports & Protocols
 
 | Component | Protocol | Address | Port | Auth |
 |-----------|----------|---------|------|------|
@@ -331,7 +414,7 @@ Two workflows run on every push to `main` and every pull request:
 
 ---
 
-## 11. Data Persistence
+## 12. Data Persistence
 
 KGiit deliberately avoids databases. State is held in:
 
@@ -342,6 +425,12 @@ KGiit deliberately avoids databases. State is held in:
 | ML model | `model.joblib` (file) | Permanent (committed) |
 | GitHub API response | In-memory | Single run |
 | Auth token | Environment variable | Process lifetime |
+| **Write-back audit log** | **`kgiit-action-log.jsonl` (JSONL file)** | **Permanent — append-only, survives process restarts** |
 
 This design keeps the tool lightweight (< 5MB heap excluding model) and stateless
 across runs — no database migrations, no cleanup required.
+
+The audit log is the **one deliberate exception** to the stateless design: it is
+intentionally durable, append-only, and human-readable (`cat kgiit-action-log.jsonl`),
+because the whole point of the confirmed write-back feature is that every human
+approval is provably on record — including declined ones.
