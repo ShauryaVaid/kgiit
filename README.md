@@ -86,6 +86,65 @@ When executing `kgiit analyze`, the system retrieves raw issue data from GitHub.
 
 ---
 
+## Confirmed Write-Back (Round 2 — HowToAlgo ADLC)
+
+Analyze Mode was read-only through Round 1 — it suggested labels and
+severity but never touched a real issue. **It can now act, but only with a
+human explicitly in the loop for every single write.**
+
+This is the core of the HowToAlgo **Agent-Driven Lifecycle (ADLC)** pattern:
+AI suggests → Human decides → System acts → Every outcome is auditable.
+
+```bash
+# Analyze a single issue and offer to apply the AI suggestion
+kgiit analyze --repo owner/name --issue 42 --apply
+```
+
+This shows the classification as before, then previews exactly what would
+change — current labels, proposed labels, and who is confirming (resolved
+from your `GITHUB_TOKEN`'s real GitHub identity, not a typed-in name) —
+and waits for an explicit `y/N`. Nothing is sent to GitHub until you
+confirm; declining is fully supported and is itself logged. **There is no
+flag to skip the prompt.**
+
+Every attempt — applied, declined, or failed — is written to a local,
+append-only audit log:
+
+```bash
+kgiit log
+# or inspect directly: cat kgiit-action-log.jsonl
+```
+
+**To verify this yourself (judge walkthrough):**
+1. Run the command above → answer `n` (decline)
+2. Run it again → answer `y` (confirm)
+3. Check the real issue on GitHub for the new labels
+4. Run `kgiit log` → see both the decline and the apply, each with a
+   timestamp and a verified confirmer identity
+
+**Design choices worth noting:**
+- **Scoped to one issue at a time.** `--apply` is rejected with `--all-open`
+  on purpose — the highest-risk action stays single-issue.
+- **Additive, not destructive.** Labels are added via GitHub's "add labels"
+  endpoint, so existing labels on the issue are never overwritten.
+- **Graceful failure.** A bad token, missing permissions, or dead network
+  produces a clear, logged failure message — never a raw traceback.
+- **Optional `--dual-approval`** requires two different confirmations before
+  a write is sent, for teams that want a stricter gate than the default.
+- **Verified identity.** "Who confirmed" in the log is your actual GitHub
+  login from the token (`GET /user`), not a typed-in name — backed by
+  GitHub's own auth, not an honor system.
+
+Available from both the CLI (`kgiit analyze --apply`) and the **interactive
+TUI menu** (option 3 for write-back, option 4 for viewing the audit log).
+
+See [ARCHITECTURE.md § 3](ARCHITECTURE.md) for the full data-flow diagram
+and the reasoning behind the clean module split between `skills.py`
+(pure classification), `writeback.py` (confirm/apply orchestration, zero
+UI code), and `github_client.py` (the only thing that talks to GitHub).
+
+---
+
 ## Interactive Curriculum
 
 The KGiit Learn Engine includes a comprehensive, interactive curriculum designed to take users from absolute beginners to collaborative engineers. The curriculum is divided into three primary tracks:

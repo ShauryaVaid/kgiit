@@ -4,7 +4,9 @@ kgiit — Two doors, one CLI.
 Usage:
     kgiit                   Interactive mode (Rich menu)
     kgiit analyze [OPTIONS]  Analyze real GitHub issues (needs internet + optional GITHUB_TOKEN)
+                             Add --apply to confirm and write a suggestion back to a real issue.
     kgiit learn  [OPTIONS]  Practice git commands in a safe offline sandbox
+    kgiit log    [OPTIONS]  View the local write-back audit log (who confirmed what, when)
 """
 from rich.table import Table
 import os
@@ -29,6 +31,7 @@ from rich.text import Text
 
 from kgiit import __version__
 from kgiit.analyze.cli import analyze_cmd
+from kgiit.analyze.log_cli import log_cmd
 from kgiit.learn.cli import learn_cmd
 
 console = Console()
@@ -74,7 +77,7 @@ def _print_kgiit_banner() -> None:
 
     # 4) Modes / Doors (Cleanly listed under the banner)
     console.print(
-        "[bold #ff007f]Door 1 \u2192[/bold #ff007f] [bold white]KGiit analyze[/bold white]"
+        "[bold #ff007f]Door 1 →[/bold #ff007f] [bold white]KGiit analyze[/bold white]"
         " — Apply git/GitHub skills on real repos",
         justify="center"
     )
@@ -84,7 +87,7 @@ def _print_kgiit_banner() -> None:
     )
     console.print()
     console.print(
-        "[bold #00f2fe]Door 2 \u2192[/bold #00f2fe] [bold white]KGiit learn[/bold white]"
+        "[bold #00f2fe]Door 2 →[/bold #00f2fe] [bold white]KGiit learn[/bold white]"
         "   — Practice git commands in a safe sandbox",
         justify="center"
     )
@@ -119,7 +122,12 @@ def _interactive_menu() -> None:
             "", "[dim #a0a5b5](fully offline, no LLM, no external API)[/dim #a0a5b5]\n")
         menu_table.add_row(
             "  [bold #b15eff][3][/bold #b15eff]",
-            "Run Automated Demo — hands-free walkthrough of the CLI\n")
+            "Write-back — approve & apply an AI suggestion to a real GitHub issue\n")
+        menu_table.add_row(
+            "", "[dim #a0a5b5](requires GITHUB_TOKEN with write scope)[/dim #a0a5b5]\n")
+        menu_table.add_row(
+            "  [bold #ffa500][4][/bold #ffa500]",
+            "View audit log — see who confirmed what, and when\n")
         menu_table.add_row(
             "  [bold #6c757d]\\[/bye, q][/bold #6c757d]",
             "[dim]Quit[/dim]\n")
@@ -128,7 +136,7 @@ def _interactive_menu() -> None:
 
         try:
             choice = console.input(
-                "[bold #ff69b4]Enter choice (1/2/3/q): [/bold #ff69b4]").strip().lower()
+                "[bold #ff69b4]Enter choice (1/2/3/4/q): [/bold #ff69b4]").strip().lower()
         except (EOFError, KeyboardInterrupt):
             console.print("\n[dim]Exiting.[/dim]")
             sys.exit(0)
@@ -136,7 +144,7 @@ def _interactive_menu() -> None:
         if choice == "1":
             console.print()
             repo = console.input(
-                "[bold #ff69b4]Enter GitHub repo (e.g. KGiit-project/KGiit): [/bold #ff69b4]").strip()
+                "[bold #ff69b4]Enter GitHub repo (e.g. octocat/Hello-World): [/bold #ff69b4]").strip()
             if repo:
                 console.print(f"\n[dim]Running analyze for {repo}...[/dim]\n")
                 cmd = ["kgiit"] if sys.platform != "win32" else ["kgiit.exe"]
@@ -152,16 +160,37 @@ def _interactive_menu() -> None:
             from kgiit.learn.cli import launch_learn_interactive
             launch_learn_interactive()
         elif choice == "3":
+            # Write-back flow: ask for repo + issue then --apply
+            console.print()
+            repo = console.input(
+                "[bold #ff69b4]Enter GitHub repo (e.g. octocat/Hello-World): [/bold #ff69b4]").strip()
+            issue_str = console.input(
+                "[bold #ff69b4]Enter issue number to analyze and approve: [/bold #ff69b4]").strip()
+            if repo and issue_str.isdigit():
+                console.print(
+                    f"\n[dim]Running write-back flow for {repo}#{issue_str}...[/dim]\n"
+                    f"[dim]You will be shown the AI suggestion and asked to approve or decline.[/dim]\n"
+                )
+                cmd = ["kgiit"] if sys.platform != "win32" else ["kgiit.exe"]
+                subprocess.run(
+                    cmd + ["analyze", "--repo", repo, "--issue", issue_str, "--apply"],
+                    check=False
+                )
+            else:
+                console.print("[red]Invalid repo or issue number.[/red]")
+                import time
+                time.sleep(1)
+        elif choice == "4":
             console.print()
             cmd = ["kgiit"] if sys.platform != "win32" else ["kgiit.exe"]
-            subprocess.run(cmd + ["learn", "demo"], check=False)
+            subprocess.run(cmd + ["log"], check=False)
         elif choice in ("q", "quit", "exit", "/bye", ""):
             console.print(
                 "\n[bold bright_magenta]Goodbye![/bold bright_magenta]")
             sys.exit(0)
         else:
             console.print(
-                f"\n[bold red]Invalid choice:[/] '{choice}'. Please enter 1, 2, 3, or /bye.")
+                f"\n[bold red]Invalid choice:[/] '{choice}'. Please enter 1, 2, 3, 4, or /bye.")
             import time
             time.sleep(1)
 
@@ -188,10 +217,15 @@ def main(ctx: click.Context) -> None:
     \b
     Door 1: kgiit analyze — Apply git/GitHub skills on real repositories
             (needs internet, optional GITHUB_TOKEN)
+            Add --apply to confirm and write AI suggestions to real issues.
 
     \b
     Door 2: kgiit learn  — Practice git commands in a safe offline sandbox
             (fully offline, no LLM, no external API)
+
+    \b
+    kgiit log — View the local write-back audit log
+            (who confirmed which suggestion, what was applied, and when)
 
     Run with no subcommand for an interactive menu.
     """
@@ -202,6 +236,7 @@ def main(ctx: click.Context) -> None:
 # Register subcommands
 main.add_command(analyze_cmd, name="analyze")
 main.add_command(learn_cmd, name="learn")
+main.add_command(log_cmd, name="log")
 
 
 if __name__ == "__main__":

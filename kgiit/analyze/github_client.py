@@ -28,6 +28,10 @@ class GitHubRateLimitError(GitHubAPIError):
     """Raised when the GitHub API rate limit is exceeded (403 with X-RateLimit-Remaining: 0)."""
 
 
+class GitHubValidationError(GitHubAPIError):
+    """Raised when GitHub rejects a write request as invalid (422)."""
+
+
 class GitHubClient:
     """Client for interacting with the GitHub REST API."""
 
@@ -91,9 +95,27 @@ class GitHubClient:
         elif status_code in (401, 403):
             raise GitHubAuthError(
                 f"Authentication/Authorization error ({status_code}): {response.text}")
+        elif status_code == 422:
+            raise GitHubValidationError(
+                f"GitHub rejected the request as invalid (422): {response.text}")
         else:
             raise GitHubAPIError(
                 f"GitHub API request failed with status {status_code}: {response.text}")
+
+    def _guarded_call(self, fn, *args, **kwargs) -> Any:
+        """
+        Execute a requests call and translate low-level network failures
+        (no connection, DNS failure, timeout) into GitHubAPIError so that
+        callers only ever need to catch one exception family — including
+        when GitHub is simply unreachable, not just when it responds with
+        an error status code.
+        """
+        try:
+            response = fn(*args, **kwargs)
+        except requests.exceptions.RequestException as exc:
+            raise GitHubAPIError(
+                f"Network error while contacting GitHub API: {exc}") from exc
+        return self._handle_response(response)
 
     def _normalize_issue(self, raw_issue: dict[str, Any]) -> dict[str, Any]:
         """
@@ -126,15 +148,57 @@ class GitHubClient:
                   issue_number: int) -> dict[str, Any]:
         """Fetch details for a single issue by owner, repo, and issue_number."""
         url = f"{self.base_url}/repos/{owner}/{repo}/issues/{issue_number}"
-        response = self.session.get(url)
-        data = self._handle_response(response)
+        data = self._guarded_call(self.session.get, url)
         return self._normalize_issue(data)
 
     def list_open_issues(self, owner: str, repo: str) -> list[dict[str, Any]]:
         """List all open issues for a repository."""
         url = f"{self.base_url}/repos/{owner}/{repo}/issues"
         params = {"state": "open"}
-        response = self.session.get(url, params=params)
-        data = self._handle_response(response)
+        data = self._guarded_call(self.session.get, url, params=params)
         return [self._normalize_issue(item)
                 for item in data if isinstance(item, dict)]
+
+    def get_authenticated_user(self) -> dict[str, Any]:
+        """
+        Fetch the identity of whoever GITHUB_TOKEN authenticates as.
+
+        Used to attribute write-back confirmations to a real, verified
+        GitHub identity instead of a self-reported name. Requires a token;
+        raises GitHubAuthError if none is configured.
+        """
+        if not self.token:
+            raise GitHubAuthError(
+                "No GITHUB_TOKEN configured — cannot resolve authenticated identity.")
+        url = f"{self.base_url}/user"
+        return self._guarded_call(self.session.get, url)
+
+    def add_labels(self, owner: str, repo: str, issue_number: int,
+                   labels: list[str]) -> list[str]:
+        """
+        Add one or more labels to a real GitHub issue via the API.
+
+        This is a WRITE operation — it changes live, third-party-visible
+        state and should only ever be called after an explicit human
+        confirmation upstream (see kgiit.analyze.writeback). It is
+        additive: existing labels on the issue are preserved, GitHub
+        simply appends the new ones (and creates any label that doesn't
+        already exist on the repo).
+
+        Returns the full, current list of label names now on the issue.
+        Raises GitHubAuthError if no token is configured, since writes are
+        never permitted unauthenticated.
+        """
+        if not self.token:
+            raise GitHubAuthError(
+                "No GITHUB_TOKEN configured — write-back requires an authenticated, "
+                "authorized token (repo or public_repo scope).")
+        if not labels:
+            raise GitHubValidationError(
+                "add_labels called with an empty label list — nothing to apply.")
+
+        url = f"{self.base_url}/repos/{owner}/{repo}/issues/{issue_number}/labels"
+        data = self._guarded_call(
+            self.session.post, url, json={"labels": labels})
+        return [item["name"] if isinstance(item, dict) and "name" in item
+                else str(item) for item in data]
