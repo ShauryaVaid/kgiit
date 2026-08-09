@@ -18,6 +18,8 @@
 ```
 **Two Doors. One CLI.**
 
+[▶ View Live Pitch Deck](https://kgiit.vercel.app)
+
 <br/>
 <img src="assets/images/main-menu.png" alt="Main CLI Menu" width="80%">
 
