@@ -6,6 +6,13 @@ This subcommand requires:
   - Optional: GITHUB_TOKEN env var for authenticated requests (higher rate limits)
     Without a token, the GitHub API allows ~60 unauthenticated requests/hour.
     With a token, the limit is 5,000 requests/hour.
+
+Write-back (--apply):
+  - Requires --issue (single issue, not --all-open)
+  - Requires GITHUB_TOKEN with write access (repo or public_repo scope)
+  - Every attempt — applied, declined, failed — is logged to kgiit-action-log.jsonl
+  - There is NO flag to bypass the confirmation prompt
+  - Use 'kgiit log' to view the audit trail
 """
 from __future__ import annotations
 
@@ -13,6 +20,7 @@ import sys
 
 import click
 
+from kgiit import __version__
 from kgiit.analyze import (
     GitHubAPIError,
     GitHubAuthError,
@@ -28,9 +36,18 @@ from kgiit.analyze import (
     rank_priorities,
     write_report,
 )
+from kgiit.analyze.action_log import DEFAULT_LOG_PATH
 from kgiit.analyze.formatting import (
     print_priority_table,
     print_summary_panel,
+    print_writeback_preview,
+    print_writeback_result,
+)
+from kgiit.analyze.writeback import (
+    apply_suggestion,
+    build_suggestion_labels,
+    decline_suggestion,
+    resolve_identity,
 )
 
 try:
@@ -48,10 +65,14 @@ except ImportError:
         "Set GITHUB_TOKEN environment variable for authenticated requests "
         "(5,000 req/hr vs 60 req/hr unauthenticated). "
         "A missing GITHUB_TOKEN is not an error — the tool works without one "
-        "for public repositories, just at lower rate limits."
+        "for public repositories, just at lower rate limits.\n\n"
+        "Add --apply to go beyond read-only: after analysis, a human explicitly "
+        "approves the suggestion before it's written to the real GitHub issue. "
+        "Every outcome (applied, declined, failed) is logged locally. "
+        "Run 'kgiit log' to view the audit trail."
     ),
 )
-@click.version_option(version="1.0.0", prog_name="kgiit analyze")
+@click.version_option(version=__version__, prog_name="kgiit analyze")
 @click.option("--repo",
               required=True,
               help="Target GitHub repository in owner/name format (e.g. octocat/Hello-World).",
@@ -87,6 +108,38 @@ except ImportError:
     show_default=True,
     help="Enable Agent Skill Layer (classification, priority ranking, duplicate detection, summary).",
 )
+@click.option(
+    "--apply",
+    "apply_writeback",
+    is_flag=True,
+    default=False,
+    help=(
+        "After analyzing, offer to write the suggested label(s) back to the real "
+        "GitHub issue. Requires --issue (single-issue only — bulk write-back across "
+        "--all-open is intentionally not supported, to keep the blast radius of any "
+        "one confirmation small) and a GITHUB_TOKEN with write access. Nothing is "
+        "ever written without an explicit interactive confirmation."
+    ),
+)
+@click.option(
+    "--confirmed-by",
+    default=None,
+    help=(
+        "Name/login of the human approving this write-back. When a GITHUB_TOKEN is "
+        "set, the tool auto-detects the verified GitHub login and uses that instead. "
+        "Falls back to your OS username if neither is available."
+    ),
+)
+@click.option(
+    "--dual-approval",
+    is_flag=True,
+    default=False,
+    hidden=False,
+    help=(
+        "Require a second independent confirmer before the label is applied. "
+        "Stretch mode for high-risk repositories. Both approvers are logged."
+    ),
+)
 def analyze_cmd(
     repo: str,
     issue: int | None,
@@ -94,6 +147,9 @@ def analyze_cmd(
     output: str,
     no_report: bool,
     agent_skills: bool,
+    apply_writeback: bool,
+    confirmed_by: str | None,
+    dual_approval: bool,
 ):
     """Main CLI entrypoint for kgiit analyze."""
     # 1. Validate options
@@ -104,6 +160,22 @@ def analyze_cmd(
 
     if issue is None and not all_open:
         print_error("Must specify either --issue <number> or --all-open.")
+        sys.exit(1)
+
+    # --apply restrictions
+    if apply_writeback and all_open:
+        print_error(
+            "--apply is not supported with --all-open.\n"
+            "To keep the blast radius small, write-back is limited to one issue at a time.\n"
+            "Use --issue <number> with --apply."
+        )
+        sys.exit(1)
+
+    if apply_writeback and not agent_skills:
+        print_error(
+            "--apply requires --agent-skills (the default). "
+            "Cannot write back without classifying the issue first."
+        )
         sys.exit(1)
 
     # 2. Validate repo format
@@ -163,6 +235,17 @@ def analyze_cmd(
                     classified_list, duplicates)
                 print_summary_panel(summary_text)
 
+                # 6. Write-Back Flow (--apply)
+                if apply_writeback and issue is not None:
+                    _run_writeback(
+                        client=client,
+                        repo=f"{owner}/{repo_name}",
+                        issue_number=issue,
+                        classification=classifications.get(issue, {}),
+                        confirmed_by=confirmed_by,
+                        dual_approval=dual_approval,
+                    )
+
             if not no_report:
                 report_path = write_report(
                     owner, repo_name, issues, output_path=output)
@@ -196,4 +279,135 @@ def analyze_cmd(
         sys.exit(1)
     except GitHubAPIError as e:
         print_error(f"GitHub API request failed: {e}")
+        sys.exit(1)
+
+
+def _run_writeback(
+    client: GitHubClient,
+    repo: str,
+    issue_number: int,
+    classification: dict,
+    confirmed_by: str | None,
+    dual_approval: bool,
+) -> None:
+    """
+    Inner function: run the human-in-the-loop write-back flow.
+
+    Steps:
+      1. Build label suggestion from classification
+      2. Resolve the confirmer's identity (GitHub-verified > explicit > OS)
+      3. Preview what will be applied
+      4. Ask for explicit confirmation (mandatory — no --yes bypass)
+      5. If dual_approval: ask for a second confirmer
+      6. Apply and log the result, or log the decline
+    """
+    from rich.console import Console
+    console = Console()
+
+    labels = build_suggestion_labels(classification)
+
+    if not labels:
+        console.print(
+            "\n[bold yellow]⚠ No actionable labels generated.[/bold yellow] "
+            "The classifier returned 'uncategorized'. Nothing to apply.\n"
+        )
+        return
+
+    # Resolve identity
+    approver_1 = resolve_identity(client, fallback=confirmed_by)
+
+    print_writeback_preview(
+        issue_number=issue_number,
+        repo=repo,
+        classification=classification,
+        labels=labels,
+        confirmed_by=approver_1,
+    )
+
+    # Primary confirmation — cannot be bypassed
+    confirmed = click.confirm(
+        "\nApply these labels to the real GitHub issue?",
+        default=False,
+    )
+
+    if not confirmed:
+        decline_suggestion(
+            repo=repo,
+            issue_number=issue_number,
+            labels=labels,
+            confirmed_by=approver_1,
+        )
+        print_writeback_result(
+            status="declined",
+            labels=labels,
+            repo=repo,
+            issue_number=issue_number,
+        )
+        return
+
+    # Dual-approval stretch mode
+    if dual_approval:
+        console.print(
+            "\n[bold cyan]Dual-approval mode:[/bold cyan] "
+            "A second independent confirmer is required."
+        )
+        approver_2_name = click.prompt(
+            "Enter the second approver's name/login",
+            default="",
+        ).strip()
+        if not approver_2_name:
+            console.print(
+                "[bold red]Second approver name required for dual-approval. Aborting.[/bold red]\n"
+            )
+            decline_suggestion(
+                repo=repo,
+                issue_number=issue_number,
+                labels=labels,
+                confirmed_by=f"{approver_1}+dual-approval-aborted",
+            )
+            return
+
+        confirmed_2 = click.confirm(
+            f"Confirm as second approver '{approver_2_name}'?",
+            default=False,
+        )
+        if not confirmed_2:
+            console.print(
+                "[bold yellow]⏹ Second approver declined. Write-back aborted.[/bold yellow]\n"
+            )
+            decline_suggestion(
+                repo=repo,
+                issue_number=issue_number,
+                labels=labels,
+                confirmed_by=f"{approver_1}+{approver_2_name}(declined)",
+            )
+            return
+
+        # Both approved — combine identities in the log
+        approver_1 = f"{approver_1}+{approver_2_name}"
+
+    # Apply
+    try:
+        apply_suggestion(
+            client=client,
+            repo=repo,
+            issue_number=issue_number,
+            labels=labels,
+            confirmed_by=approver_1,
+        )
+        print_writeback_result(
+            status="applied",
+            labels=labels,
+            repo=repo,
+            issue_number=issue_number,
+        )
+    except GitHubAPIError as exc:
+        print_writeback_result(
+            status="failed",
+            labels=labels,
+            repo=repo,
+            issue_number=issue_number,
+            error=str(exc),
+        )
+        # Exit with error so callers / CI can detect failure
         sys.exit(1)

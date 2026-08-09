@@ -377,11 +377,27 @@ class SandboxSession:
         self.run(["git", "switch", "main"], cwd=self.repo_dir, check=True)
 
     def _seed_remote_sim(self) -> None:
-        """Create a bare repository acting as a remote and an empty sandbox."""
+        """Create a bare repository acting as a remote and an empty sandbox.
+
+        Uses `git symbolic-ref` instead of `--initial-branch=main` to ensure
+        compatibility with Git < 2.28 (e.g. Ubuntu 20.04 LTS ships git 2.25).
+        """
         remote_dir = self.root / "remote.git"
         remote_dir.mkdir(parents=True, exist_ok=True)
-        self.run(["git", "init", "--bare", "--initial-branch=main"],
-                 cwd=remote_dir, check=True)
+
+        # Step 1: init bare repo (compatible with all git versions)
+        init_result = self.run(["git", "init", "--bare"], cwd=remote_dir)
+        if init_result.returncode != 0:
+            raise RuntimeError(
+                f"git init --bare failed: {init_result.stderr}"
+            )
+
+        # Step 2: force the default branch to 'main' without --initial-branch
+        # This works even when the system git < 2.28
+        self.run(
+            ["git", "symbolic-ref", "HEAD", "refs/heads/main"],
+            cwd=remote_dir,
+        )
 
         # User will start in an empty repo_dir to clone the remote
         self.repo_dir.mkdir(parents=True, exist_ok=True)

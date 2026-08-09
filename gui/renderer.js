@@ -91,9 +91,9 @@ async function updateStatus() {
     const res = await axios.get(`${API_BASE}/session/${sessionId}/status`);
     const state = res.data;
     elements.statusBranch.textContent = state.branch || 'N/A';
-    elements.statusStaged.textContent = state.staged_files ? state.staged_files.length : 0;
-    elements.statusUnstaged.textContent = state.unstaged_files ? state.unstaged_files.length : 0;
-    elements.statusUntracked.textContent = state.untracked_files ? state.untracked_files.length : 0;
+    elements.statusStaged.textContent = state.staged?.length ?? 0;
+    elements.statusUnstaged.textContent = state.unstaged?.length ?? 0;
+    elements.statusUntracked.textContent = state.untracked?.length ?? 0;
     elements.statusCommit.textContent = state.last_commit || 'None';
   } catch (e) {
     console.error('Status update failed', e);

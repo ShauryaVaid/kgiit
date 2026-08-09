@@ -1,8 +1,8 @@
 <div align="center">
   
-# KGiit (v1.1.0)
+# KGiit (v1.2.0)
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/release/python-3100/)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/release/python-390/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/ShauryaVaid/kgiit/actions/workflows/python-app.yml/badge.svg)](https://github.com/ShauryaVaid/kgiit/actions/workflows/python-app.yml)
 
@@ -30,6 +30,16 @@
 ### Why This Project Exists
 Version control is often an intimidating hurdle for new developers. **KGiit was built specifically to lower the barrier to entry for beginners.** As major open-source initiatives like **Google Summer of Code (GSoC) 2027** approach, having a strong, practical grasp of Git is critical for students wanting to contribute to real-world projects. KGiit provides a safe, interactive, and AI-assisted sandbox where students can practice branching, merging, and collaboration without fear, ensuring they are fully prepared for open-source development when the time comes.
 
+### Hackathon Alignment
+**Track B: Developer Productivity Tools**  
+This project is submitted under Track B, addressing the directive to "build a tool that helps software teams themselves."
+
+KGiit aligns directly with the track's primary examples through its dual-engine architecture:
+- **Analyze Engine:** Implements the required *"bug-triage assistant that reads incoming issues and suggests labels, severity, and likely owners."*
+- **Learn Engine:** Functions as an educational productivity tool, enabling students to safely learn version control fundamentals before contributing to production repositories.
+
+The v1.2.0 **Confirmed Write-Back** feature (reviewed by **HowToAlgo**) extends the Analyze Engine beyond read-only mode. Guided by the HowToAlgo ADLC (AI → Decision → Log → Confirm) philosophy, every AI suggestion now requires explicit human approval before being written to a real GitHub issue — and every outcome (applied, declined, or failed) is recorded in a durable local audit trail (`kgiit-action-log.jsonl`). The human is never bypassed.
+
 ### What is KGiit?
 **KGiit** is an advanced, dual-engine Command Line Interface designed for modern software engineering education and repository management. It serves as both a completely offline educational sandbox for mastering Git workflows and an active, network-connected diagnostic engine for analyzing live GitHub repositories.
 
@@ -41,6 +51,17 @@ Built with a high-performance Python backend and an integrated dynamic Terminal 
 > [!WARNING]
 > **Deployment & Security Model:** KGiit is strictly a **local, single-user developer tool**. 
 > The integrated FastAPI server binds exclusively to `127.0.0.1`. It is highly scalable in terms of user distribution (millions of users can run it locally), but it is NOT a hosted multi-tenant cloud service. To protect against CSRF attacks from malicious browser tabs, the server enforces a randomized, per-session `X-Auth-Token`.
+
+---
+
+## Confirmed Write-Back & Audit Trail *(v1.2.0)*
+
+KGiit v1.2.0 extends the Analyze Engine with a full human-in-the-loop write-back pipeline, built around the **HowToAlgo ADLC principle**: *AI suggests → Human decides → System acts → Every outcome logged.*
+
+- **`kgiit analyze --apply`** — After classifying an issue, presents the AI-suggested labels for human review. Nothing is ever written to GitHub without an explicit `yes` confirmation. The blast radius is intentionally limited to one issue at a time (`--issue` required; `--all-open` explicitly unsupported).
+- **`kgiit log`** — Standalone command that reads the local `kgiit-action-log.jsonl` and renders a Rich table of every write-back attempt (applied, declined, skipped, or failed), newest first. Works fully offline — no GitHub connection required.
+- **`--dual-approval`** — Optional stretch mode requiring two separate confirmers before a label is applied, demonstrating safe multi-party approval for high-risk changes.
+- **Audit durability** — Every entry is append-only JSONL. Records `who`, `what`, `when`, and `whether it succeeded`. Judges can `cat kgiit-action-log.jsonl` directly or use `kgiit log` for a formatted view.
 
 ---
 
@@ -223,4 +244,8 @@ For further technical details and contribution guidelines, please refer to the s
   <i>Building robust tooling for modern engineering education.</i>
   <br/><br/>
   <b>Contributors:</b> Aditya Tiwari and Mihir Bagh
+  <br/><br/>
+  <i>Developed and reviewed in collaboration with <b>HowToAlgo</b>.<br/>
+  The HowToAlgo ADLC philosophy (AI suggests → Human decides → System acts → Every outcome logged)<br/>
+  directly inspired the v1.2.0 Confirmed Write-Back architecture.</i>
 </div>

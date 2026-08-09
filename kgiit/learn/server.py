@@ -52,6 +52,16 @@ class ExecuteRequest(BaseModel):
     command: str
 
 
+class VerifyRequest(BaseModel):
+    """Schema for the verify_lesson endpoint body."""
+    track_id: str
+    lesson_index: int = 0
+    last_command: str = ""
+    exit_code: int = 0
+    stdout: str = ""
+    stderr: str = ""
+
+
 @app.get("/api/tracks")
 def list_tracks():
     return [
@@ -136,16 +146,16 @@ def get_status(session_id: str):
 
 
 @app.post("/api/session/{session_id}/verify")
-def verify_lesson(session_id: str, req: dict):
+def verify_lesson(session_id: str, req: VerifyRequest):
     if session_id not in _sessions:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    track_id = req.get("track_id")
-    lesson_index = req.get("lesson_index", 0)
-    last_command = req.get("last_command", "")
-    exit_code = req.get("exit_code", 0)
-    stdout = req.get("stdout", "")
-    stderr = req.get("stderr", "")
+    track_id = req.track_id
+    lesson_index = req.lesson_index
+    last_command = req.last_command
+    exit_code = req.exit_code
+    stdout = req.stdout
+    stderr = req.stderr
 
     track = get_track(track_id)
     if not track or lesson_index >= len(track.lessons):

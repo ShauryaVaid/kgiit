@@ -4,7 +4,9 @@ kgiit — Two doors, one CLI.
 Usage:
     kgiit                   Interactive mode (Rich menu)
     kgiit analyze [OPTIONS]  Analyze real GitHub issues (needs internet + optional GITHUB_TOKEN)
+                             Add --apply to confirm and write a suggestion back to a real issue.
     kgiit learn  [OPTIONS]  Practice git commands in a safe offline sandbox
+    kgiit log    [OPTIONS]  View the local write-back audit log (who confirmed what, when)
 """
 from rich.table import Table
 import os
@@ -29,6 +31,7 @@ from rich.text import Text
 
 from kgiit import __version__
 from kgiit.analyze.cli import analyze_cmd
+from kgiit.analyze.log_cli import log_cmd
 from kgiit.learn.cli import learn_cmd
 
 console = Console()
@@ -93,6 +96,11 @@ def _print_kgiit_banner() -> None:
         justify="center"
     )
     console.print()
+    console.print(
+        "[dim #a0a5b5]\u261e  kgiit log — view your write-back audit trail[/dim #a0a5b5]",
+        justify="center"
+    )
+    console.print()
 
 
 def _interactive_menu() -> None:
@@ -121,6 +129,9 @@ def _interactive_menu() -> None:
             "  [bold #b15eff][3][/bold #b15eff]",
             "Run Automated Demo — hands-free walkthrough of the CLI\n")
         menu_table.add_row(
+            "  [bold #4facfe][4][/bold #4facfe]",
+            "View Audit Log — see who confirmed what write-backs (kgiit log)\n")
+        menu_table.add_row(
             "  [bold #6c757d]\\[/bye, q][/bold #6c757d]",
             "[dim]Quit[/dim]\n")
 
@@ -128,7 +139,7 @@ def _interactive_menu() -> None:
 
         try:
             choice = console.input(
-                "[bold #ff69b4]Enter choice (1/2/3/q): [/bold #ff69b4]").strip().lower()
+                "[bold #ff69b4]Enter choice (1/2/3/4/q): [/bold #ff69b4]").strip().lower()
         except (EOFError, KeyboardInterrupt):
             console.print("\n[dim]Exiting.[/dim]")
             sys.exit(0)
@@ -155,13 +166,17 @@ def _interactive_menu() -> None:
             console.print()
             cmd = ["kgiit"] if sys.platform != "win32" else ["kgiit.exe"]
             subprocess.run(cmd + ["learn", "demo"], check=False)
+        elif choice == "4":
+            console.print()
+            cmd = ["kgiit"] if sys.platform != "win32" else ["kgiit.exe"]
+            subprocess.run(cmd + ["log"], check=False)
         elif choice in ("q", "quit", "exit", "/bye", ""):
             console.print(
                 "\n[bold bright_magenta]Goodbye![/bold bright_magenta]")
             sys.exit(0)
         else:
             console.print(
-                f"\n[bold red]Invalid choice:[/] '{choice}'. Please enter 1, 2, 3, or /bye.")
+                f"\n[bold red]Invalid choice:[/] '{choice}'. Please enter 1, 2, 3, 4, or /bye.")
             import time
             time.sleep(1)
 
@@ -202,6 +217,7 @@ def main(ctx: click.Context) -> None:
 # Register subcommands
 main.add_command(analyze_cmd, name="analyze")
 main.add_command(learn_cmd, name="learn")
+main.add_command(log_cmd, name="log")
 
 
 if __name__ == "__main__":

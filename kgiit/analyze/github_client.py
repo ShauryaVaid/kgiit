@@ -28,6 +28,16 @@ class GitHubRateLimitError(GitHubAPIError):
     """Raised when the GitHub API rate limit is exceeded (403 with X-RateLimit-Remaining: 0)."""
 
 
+class GitHubValidationError(GitHubAPIError):
+    """Raised when the GitHub API returns 422 Unprocessable Entity.
+
+    Common causes:
+      - Applying a label that doesn't exist in the repository.
+      - A malformed request body.
+    The error message will include GitHub's validation details.
+    """
+
+
 class GitHubClient:
     """Client for interacting with the GitHub REST API."""
 
@@ -85,6 +95,11 @@ class GitHubClient:
         if status_code == 404:
             raise GitHubNotFoundError(
                 f"Resource not found (404): {response.text}")
+        elif status_code == 422:
+            raise GitHubValidationError(
+                f"Validation failed (422): {response.text}\n"
+                "Tip: the label may not exist in this repository. "
+                "Create it first in GitHub Settings > Labels.")
         elif status_code == 403 and rate_limit_remaining == "0":
             raise GitHubRateLimitError(
                 f"GitHub API rate limit exceeded (403): {response.text}")
@@ -126,7 +141,7 @@ class GitHubClient:
                   issue_number: int) -> dict[str, Any]:
         """Fetch details for a single issue by owner, repo, and issue_number."""
         url = f"{self.base_url}/repos/{owner}/{repo}/issues/{issue_number}"
-        response = self.session.get(url)
+        response = self._guarded_call(self.session.get, url)
         data = self._handle_response(response)
         return self._normalize_issue(data)
 
@@ -134,7 +149,94 @@ class GitHubClient:
         """List all open issues for a repository."""
         url = f"{self.base_url}/repos/{owner}/{repo}/issues"
         params = {"state": "open"}
-        response = self.session.get(url, params=params)
+        response = self._guarded_call(self.session.get, url, params=params)
         data = self._handle_response(response)
         return [self._normalize_issue(item)
                 for item in data if isinstance(item, dict)]
+
+    def add_labels(
+        self,
+        owner: str,
+        repo: str,
+        issue_number: int,
+        labels: list[str],
+    ) -> dict[str, Any]:
+        """
+        Add labels to an existing GitHub issue (additive — never removes existing labels).
+
+        Requires a GITHUB_TOKEN with at least 'public_repo' scope for public
+        repositories, or 'repo' scope for private repositories.
+
+        Args:
+            owner: Repository owner login.
+            repo: Repository name.
+            issue_number: Target issue number.
+            labels: List of label name strings to apply.
+
+        Returns:
+            The raw GitHub API response dict.
+
+        Raises:
+            GitHubAuthError: If the token lacks write permissions.
+            GitHubNotFoundError: If the issue doesn't exist.
+            GitHubValidationError: If a label name doesn't exist in the repo.
+            GitHubAPIError: For any other API failure.
+        """
+        if not labels:
+            return {"labels": []}
+
+        url = f"{self.base_url}/repos/{owner}/{repo}/issues/{issue_number}/labels"
+        payload = {"labels": labels}
+        response = self._guarded_call(self.session.post, url, json=payload)
+        return self._handle_response(response)
+
+    def get_authenticated_user(self) -> dict[str, Any]:
+        """
+        Return the GitHub user that the configured token authenticates as.
+
+        Used by writeback.resolve_identity() to obtain a verified GitHub
+        login rather than relying on a self-reported --confirmed-by value.
+
+        Returns:
+            Dict with at least 'login' and 'name' keys.
+
+        Raises:
+            GitHubAuthError: If the token is invalid or missing.
+            GitHubAPIError: For any other API failure.
+        """
+        url = f"{self.base_url}/user"
+        response = self._guarded_call(self.session.get, url)
+        return self._handle_response(response)
+
+    def _guarded_call(self, method, url: str, **kwargs) -> requests.Response:
+        """
+        Wrap a requests call to convert all network-level errors into
+        GitHubAPIError so callers never see an unhandled ConnectionError,
+        Timeout, or similar low-level exception.
+
+        Args:
+            method: A bound requests.Session method (e.g. self.session.get).
+            url: The full URL to call.
+            **kwargs: Additional arguments passed to the method.
+
+        Returns:
+            requests.Response — always; never raises a requests exception.
+
+        Raises:
+            GitHubAPIError: For any network, DNS, or timeout failure.
+        """
+        try:
+            return method(url, timeout=15, **kwargs)
+        except requests.exceptions.Timeout:
+            raise GitHubAPIError(
+                f"Request timed out after 15 seconds: {url}\n"
+                "Check your internet connection and try again."
+            )
+        except requests.exceptions.ConnectionError as exc:
+            raise GitHubAPIError(
+                f"Could not connect to GitHub API: {exc}\n"
+                "Check your internet connection. "
+                "GitHub status: https://www.githubstatus.com/"
+            )
+        except requests.exceptions.RequestException as exc:
+            raise GitHubAPIError(f"Network error: {exc}")

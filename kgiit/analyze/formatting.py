@@ -186,3 +186,156 @@ def print_error(message: str, console: Console | None = None) -> None:
         console = Console(stderr=True)
 
     console.print(f"[bold red]Error:[/] {message}")
+
+
+def print_writeback_preview(
+    issue_number: int,
+    repo: str,
+    classification: dict[str, Any],
+    labels: list[str],
+    confirmed_by: str,
+    console: Console | None = None,
+) -> None:
+    """
+    Print a clear preview of what will be written to GitHub before confirmation.
+
+    Shows the human exactly:
+    - Which repo and issue will be modified
+    - What labels will be applied
+    - Who will be credited as the confirmer
+    - A warning that this is irreversible
+    """
+    if console is None:
+        console = Console()
+
+    sev = classification.get("severity", "?")
+    lbl = classification.get("label", "?")
+    owner_field = classification.get("owner", "unassigned")
+
+    if sev == "HIGH":
+        sev_styled = "[bold black on bright_red] HIGH [/bold black on bright_red]"
+    elif sev == "MEDIUM":
+        sev_styled = "[bold black on yellow] MEDIUM [/bold black on yellow]"
+    else:
+        sev_styled = "[bold black on green] LOW [/bold black on green]"
+
+    labels_str = "  " + "\n  ".join(f"[bold magenta]{lb}[/bold magenta]" for lb in labels)
+
+    panel_content = (
+        f"[bold white]Repository:[/] [cyan]{repo}[/cyan]\n"
+        f"[bold white]Issue:[/] [cyan]#{issue_number}[/cyan]\n\n"
+        f"[bold white]AI Classification:[/]\n"
+        f"  Severity: {sev_styled}\n"
+        f"  Category: [bold magenta]{lbl}[/bold magenta]\n"
+        f"  Assignee: [bold white]{owner_field}[/bold white]\n\n"
+        f"[bold white]Labels to Apply:[/]\n"
+        f"{labels_str}\n\n"
+        f"[bold white]Confirming As:[/] [bold green]{confirmed_by}[/bold green]\n\n"
+        "[dim]This will POST labels to the real GitHub issue.[/dim]\n"
+        "[dim]Existing labels are preserved (additive only).[/dim]"
+    )
+
+    console.print(
+        Panel(
+            panel_content,
+            title="[bold yellow]\u26a0 Write-Back Preview[/bold yellow]",
+            border_style="yellow",
+            padding=(1, 2),
+        )
+    )
+
+
+def print_writeback_result(
+    status: str,
+    labels: list[str],
+    repo: str,
+    issue_number: int,
+    error: str | None = None,
+    console: Console | None = None,
+) -> None:
+    """
+    Print the result of a write-back attempt (applied, declined, or failed).
+    """
+    if console is None:
+        console = Console()
+
+    if status == "applied":
+        labels_str = ", ".join(f"[bold magenta]{lb}[/bold magenta]" for lb in labels)
+        console.print(
+            f"\n[bold green]\u2705 Labels applied successfully![/bold green]\n"
+            f"  Repo:   [cyan]{repo}[/cyan]\n"
+            f"  Issue:  [cyan]#{issue_number}[/cyan]\n"
+            f"  Labels: {labels_str}\n"
+            f"\n[dim]Logged to kgiit-action-log.jsonl. View with: kgiit log[/dim]\n"
+        )
+    elif status == "declined":
+        console.print(
+            f"\n[bold yellow]\u23f9 Write-back declined.[/bold yellow] "
+            "No changes made to GitHub. Outcome recorded in the audit log.\n"
+        )
+    elif status == "failed":
+        console.print(
+            f"\n[bold red]\u274c Write-back failed.[/bold red]\n"
+            f"  Error: [red]{error}[/red]\n"
+            "  No labels were applied. Failure recorded in the audit log.\n"
+            "  Run [bold]kgiit log[/bold] to review.\n"
+        )
+
+
+def print_action_log_table(
+    entries: list[dict[str, Any]],
+    console: Console | None = None,
+) -> Table:
+    """
+    Render a list of audit log entries as a Rich table.
+    Reusable from both log_cli.py and tests.
+    """
+    if console is None:
+        console = Console()
+
+    from rich import box as _box
+    table = Table(
+        title="[bold yellow]kgiit — Write-Back Audit Log[/bold yellow]",
+        show_header=True,
+        header_style="bold cyan",
+        border_style="bright_blue",
+        box=_box.ROUNDED,
+        expand=True,
+    )
+    table.add_column("Timestamp (UTC)", style="dim", min_width=19, no_wrap=True)
+    table.add_column("Repo", style="bold white", min_width=12)
+    table.add_column("Issue", style="bold cyan", justify="right", width=7)
+    table.add_column("Status", justify="center", width=10)
+    table.add_column("Labels", style="bold magenta", min_width=16)
+    table.add_column("By", style="bold green", min_width=14)
+
+    status_styles = {
+        "applied": "[bold green]applied[/bold green]",
+        "declined": "[bold yellow]declined[/bold yellow]",
+        "failed": "[bold red]failed[/bold red]",
+        "skipped": "[dim]skipped[/dim]",
+    }
+
+    for entry in entries:
+        ts = entry.get("timestamp", "")
+        if "T" in ts:
+            ts = ts[:19].replace("T", " ")
+
+        status = entry.get("status", "unknown")
+        labels = entry.get("suggestion", {}).get("labels", [])
+        labels_str = ", ".join(labels) if labels else "-"
+        if status == "failed":
+            err = entry.get("error", "")[:35]
+            labels_str = f"[red]ERR: {err}[/red]"
+
+        table.add_row(
+            ts,
+            entry.get("repo", "-"),
+            f"#{entry.get('issue_number', '?')}",
+            status_styles.get(status, f"[dim]{status}[/dim]"),
+            labels_str,
+            entry.get("confirmed_by", "-"),
+        )
+
+    console.print(table)
+    return table
